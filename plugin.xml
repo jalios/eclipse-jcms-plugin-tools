@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>  
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            description="Jalios Sync Category"
+            id="sync.commands.category"
+            name="Jalios Sync Category">
+      </category>
+      <command
+            name="Preview"
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.preview">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.sync"
+            name="Sync">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.syncall"
+            name="Sync All">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.previewall"
+            name="Preview All">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.w2p.syncall"
+            name="Sync All W2P">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.w2p.previewall"
+            name="Preview All W2P">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.p2w.syncall"
+            name="Sync All P2W">
+      </command>
+      <command
+            categoryId="sync.commands.category"
+            id="com.jalios.commands.p2w.previewall"
+            name="Preview All P2W">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.jalios.commands.preview"
+            class="com.jalios.jcmstools.handlers.SyncHandler">
+      </handler>
+      <handler
+            class="com.jalios.jcmstools.handlers.SyncHandler"
+            commandId="com.jalios.commands.sync">
+      </handler>
+      <handler
+            class="com.jalios.jcmstools.handlers.SyncAllHandler"
+            commandId="com.jalios.commands.syncall">
+      </handler>
+      <handler
+            class="com.jalios.jcmstools.handlers.SyncAllHandler"
+            commandId="com.jalios.commands.previewall">
+      </handler>
+   </extension>
+   <extension point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.jalios.commands.preview"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="CTRL+ALT+Q W"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="com.jalios.commands.sync"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+Alt+Q S">
+      </key>
+      <key
+            commandId="com.jalios.commands.syncall"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+Alt+Q A">
+      </key>
+      <key
+            commandId="com.jalios.commands.previewall"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+Alt+Q Z">
+      </key>      
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.menus">     
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <menu
+               icon="src/main/resources/icons/jalios.ico"
+               label="%jpt.menu.label">
+            <command
+                  commandId="com.jalios.commands.preview"
+                  icon="src/main/resources/icons/preview.ico"
+                  label="%jpt.command.previewsync.label"
+                  tooltip="Don't worry, try me ! It does nothing but preview"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.jalios.commands.sync"
+                  icon="src/main/resources/icons/sync.ico"
+                  label="%jpt.command.sync.label"
+                  tooltip="Go for it !"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="com.jalios.jpt.menu"
+               label="Jalios Plugin Tools"
+               mnemonic="J">
+            <command
+                  commandId="com.jalios.commands.syncall"
+                  icon="src/main/resources/icons/sync.ico"
+                  label="Sync All"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.jalios.commands.previewall"
+                  icon="src/main/resources/icons/preview.ico"
+                  label="Preview All"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.jalios.commands.p2w.syncall"
+                  label="Sync All P2W"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.jalios.commands.p2w.previewall"
+                  label="Preview All P2W"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.jalios.commands.w2p.syncall"
+                  label="Sync All W2P"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.jalios.commands.w2p.previewall"
+                  label="Preview All W2P"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         id="com.jalios.jpt.natures.jcmspluginnature"
+         name="JCMS Plugin Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.jalios.jcmstools.natures.JcmsPluginNature">
+         </run>
+      </runtime>
+   </extension>
+   <extension
+         id="com.jalios.jpt.natures.jcmsprojectnature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.jalios.jcmstools.natures.JcmsProjectNature">
+         </run>
+      </runtime>
+   </extension>
+
+</plugin>
