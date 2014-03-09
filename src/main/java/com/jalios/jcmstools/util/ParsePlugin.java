@@ -829,7 +829,7 @@ public class ParsePlugin {
 
 	public Set<String> getClassFiles(String fullname) {
 		String fullpath = fullname.replace('.', '/');
-		Set<String> pathSet = new HashSet<String>(5);
+		Set<String> pathSet = new HashSet<String>();
 		pathSet.add("WEB-INF/classes/" + fullpath + ".java");
 		return pathSet;
 	}
