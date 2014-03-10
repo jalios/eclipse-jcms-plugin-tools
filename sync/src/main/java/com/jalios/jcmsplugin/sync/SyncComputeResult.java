@@ -25,7 +25,7 @@ import java.util.Map;
  * @author Xuan Tuong LE (lxuong@gmail.com)
  * 
  */
-public class SyncComputeResult {
+public final class SyncComputeResult {
   private Map<Direction, List<SyncFile>> map;
 
   public SyncComputeResult() {
