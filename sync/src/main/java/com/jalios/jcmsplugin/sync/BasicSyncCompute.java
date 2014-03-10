@@ -22,16 +22,17 @@ import java.util.List;
  * 
  * @author Xuan Tuong LE (lxuong@gmail.com)
  */
-public class BasicSyncCompute implements ISync {
+public final class BasicSyncCompute implements ISync {
 
   @Override
-  public SyncComputeResult computeSync(File jcmsProjectDirPath, File pluginProjectDirPath,
-      SyncConfiguration configuration, SyncComputeResult previousSyncCompute) throws SyncException {
-    List<File> subDirPluginProject = SyncUtil.listDirectoryFirstLevel(pluginProjectDirPath);
+  public SyncComputeResult computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException {   
+    File wpRootDir = conf.getWebappProjectRootDir();
+    File ppRootDir = conf.getPluginProjectRootDir();
+    List<File> subDirPluginProject = SyncUtil.listDirectoryFirstLevel(ppRootDir);
 
     List<File> filePluginProjectList = new ArrayList<File>();
     if (subDirPluginProject == null || subDirPluginProject.size() == 0) {
-      filePluginProjectList = SyncUtil.deepListFiles(pluginProjectDirPath, new BlackListFilter());
+      filePluginProjectList = SyncUtil.deepListFiles(ppRootDir, new BlackListFilter());
     } else {
       for (Iterator<File> it = subDirPluginProject.iterator(); it.hasNext();) {
         File itDir = (File) it.next();
@@ -43,20 +44,19 @@ public class BasicSyncCompute implements ISync {
     for (Iterator<File> it = filePluginProjectList.iterator(); it.hasNext();) {
       File filePluginProject = (File) it.next();
       // Get the related tgtFile
-      String filePluginProjectRelativePath = SyncUtil.getRelativePath(pluginProjectDirPath, filePluginProject);
-      File fileJcmsProject = new File(jcmsProjectDirPath, filePluginProjectRelativePath);
+      String filePluginProjectRelativePath = SyncUtil.getRelativePath(ppRootDir, filePluginProject);
+      File fileJcmsProject = new File(wpRootDir, filePluginProjectRelativePath);
 
       if (fileJcmsProject == null || fileJcmsProject.lastModified() < filePluginProject.lastModified()) {
-        previousSyncCompute.addSyncFiles(filePluginProject, Direction.TO_WEBAPP, fileJcmsProject);
+        result.addSyncFiles(filePluginProject, Direction.TO_WEBAPP, fileJcmsProject);
         continue;
       }
 
       if (fileJcmsProject.lastModified() > filePluginProject.lastModified()) {
-        previousSyncCompute.addSyncFiles(fileJcmsProject, Direction.TO_PLUGIN, filePluginProject);
+        result.addSyncFiles(fileJcmsProject, Direction.TO_PLUGIN, filePluginProject);
       }
     }
 
-    return previousSyncCompute;
+    return result;
   }
-
 }
