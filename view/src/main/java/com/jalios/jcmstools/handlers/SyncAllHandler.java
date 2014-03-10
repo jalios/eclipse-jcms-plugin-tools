@@ -1,7 +1,6 @@
 package com.jalios.jcmstools.handlers;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -17,9 +16,16 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.jalios.jcmstools.sync.SyncContext;
+import com.jalios.jcmsplugin.sync.BasicSyncCompute;
+import com.jalios.jcmsplugin.sync.Direction;
+import com.jalios.jcmsplugin.sync.ISync;
+import com.jalios.jcmsplugin.sync.ImpliciteSyncCompute;
+import com.jalios.jcmsplugin.sync.SyncComputeResult;
+import com.jalios.jcmsplugin.sync.SyncConfiguration;
+import com.jalios.jcmsplugin.sync.SyncException;
+import com.jalios.jcmsplugin.sync.SyncFile;
+import com.jalios.jcmsplugin.sync.SyncUtil;
 import com.jalios.jcmstools.transversal.JPTUtil;
-import com.jalios.jcmstools.util.SyncManager;
 
 /**
  * Our sample handler extends AbstractHandler, an IHandler base class.
@@ -31,7 +37,6 @@ public class SyncAllHandler extends AbstractHandler {
   public static final String ID = "SyncAllHandler";
   public static final String ID_PREVIEW_CMD = "com.jalios.commands.previewall";
   private static final String CONSOLE_NAME = "Jalios Plugin Tools - Sync Status";
-  public static final SyncManager syncMgr = SyncManager.getInstance();
 
   /**
    * The constructor.
@@ -66,7 +71,6 @@ public class SyncAllHandler extends AbstractHandler {
     MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
     console.activate();
     MessageConsoleStream stream = console.newMessageStream();
-    syncMgr.setStream(stream);
 
     for (IProject jcmsPluginProject : JPTUtil.getAllJCMSProject()) {
       stream.println("\n---------------------------------------------------");
@@ -84,29 +88,33 @@ public class SyncAllHandler extends AbstractHandler {
       }
 
       // init configuration and sync context
-      String syncConfPath = JPTUtil.getSyncConfPath(jcmsWebappProject);
-      SyncContext syncContext = new SyncContext(syncConfPath);
+      String cfPath = JPTUtil.getSyncConfPath(jcmsWebappProject);
+      File ppPath = jcmsPluginProject.getLocation().toFile();
+      File wpPath = new File(JPTUtil.getWebappRootdir(jcmsWebappProject));
+      SyncConfiguration conf = new SyncConfiguration.Builder(ppPath, wpPath).conf(cfPath).build();
 
-      syncContext.setWebappProjectPath(JPTUtil.getWebappRootdir(jcmsWebappProject));
-      File pluginFile = jcmsPluginProject.getLocation().toFile();
-      syncContext.setPluginProjectPath(pluginFile.getPath());
-
-      // take first level plugin directory (plugins, WEB-INF,...)
-      List<String> pluginSubFolders = new ArrayList<String>();
-      for (File file : pluginFile.listFiles()) {
-        if (file.isDirectory()) {
-          pluginSubFolders.add(file.getName());
-        }
+      if (preview) {
+        conf.enablePreview();
       }
-      syncContext.setPluginProjectSubFoldersPath(pluginSubFolders);
-
-      if (!preview) {
-        syncContext.disablePreview();
-      }
-
+      
+      SyncComputeResult result = new SyncComputeResult();
+      ISync basicComputeSync = new BasicSyncCompute();
+      ISync impliciteComputeSync = new ImpliciteSyncCompute();
       try {
-        syncMgr.execute(syncContext);
-      } catch (Exception e) {
+        result = basicComputeSync.computeSync(conf, result);
+        result = impliciteComputeSync.computeSync(conf, result);
+        SyncUtil.runSync(result);
+        List<SyncFile> sfToPluginList = result.getSyncFiles(Direction.TO_PLUGIN);
+        stream.println("W->P : " + sfToPluginList.size() + " files");
+        for (SyncFile sf : sfToPluginList){
+          stream.println("W->P : " + sf.getTgt());
+        }
+        List<SyncFile> sfToWebappList = result.getSyncFiles(Direction.TO_WEBAPP);
+        stream.println("P->W : " + sfToWebappList.size() + " files");
+        for (SyncFile sf : sfToWebappList){
+          stream.println("P->W : " + sf.getTgt());
+        }
+      } catch (SyncException e) {
         e.printStackTrace();
       }
 
