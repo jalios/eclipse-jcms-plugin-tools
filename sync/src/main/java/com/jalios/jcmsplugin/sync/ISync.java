@@ -13,10 +13,12 @@
  */
 package com.jalios.jcmsplugin.sync;
 
-import java.io.File;
-
+/**
+ * 
+ * @author Xuan Tuong LE - lxtuong@gmail.com
+ *
+ */
 public interface ISync {
-  public SyncComputeResult computeSync(File jcmsProjectDirPath, File pluginProjectDirPath,
-      SyncConfiguration configuration, SyncComputeResult previousSyncCompute) throws SyncException;
+  public SyncComputeResult computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException;
 
 }
