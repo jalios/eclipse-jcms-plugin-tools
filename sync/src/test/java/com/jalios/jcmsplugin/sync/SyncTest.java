@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,30 +39,33 @@ import com.jalios.jcmsplugin.sync.SyncUtil;
  * @author Xuan Tuong LE (lxuong@gmail.com)
  */
 public class SyncTest {
+  private static Logger logger = Logger.getLogger(SyncTest.class);
   private ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
-  private File tmpJcmsProject;
+  private File tmpWebappProject;
   private File tmpPluginProject;
 
-  private File jcmsProject;
-  private File pluginProject;
+  private File webappRootDirProject;
+  private File pluginProjectRootDir;
 
   @Before
   public void setUp() {
-    tmpJcmsProject = SyncUtil.createTempDir();
-    jcmsProject = new File(tmpJcmsProject, "jcmsproject");
-    jcmsProject.mkdirs();
-    createLightJcmsProject(jcmsProject);
+    tmpWebappProject = SyncUtil.createTempDir();
+    webappRootDirProject = new File(tmpWebappProject, "webappproject");
+    webappRootDirProject.mkdirs();
+    createLightJcmsProject(webappRootDirProject);
+    logger.info("Create webapp project at " + webappRootDirProject.getAbsolutePath());
 
     tmpPluginProject = SyncUtil.createTempDir();
-    pluginProject = new File(tmpPluginProject, "pluginproject");
-    pluginProject.mkdirs();
-    createLightPluginProject(pluginProject);
+    pluginProjectRootDir = new File(tmpPluginProject, "pluginproject");
+    pluginProjectRootDir.mkdirs();
+    createLightPluginProject(pluginProjectRootDir);
+    logger.info("Create plugin project at " + pluginProjectRootDir.getAbsolutePath());
   }
 
   @After
   public void tearDown() {
     try {
-      FileUtils.deleteDirectory(tmpJcmsProject);
+      FileUtils.deleteDirectory(tmpWebappProject);
       FileUtils.deleteDirectory(tmpPluginProject);
     } catch (IOException e) {
       e.printStackTrace();
@@ -73,10 +77,10 @@ public class SyncTest {
   public void syncNewPluginProject() {
     // run a sync
     ISync basicComputeSync = (ISync) context.getBean("basicComputeSync");
-    SyncConfiguration config = new SyncConfiguration();
+    SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
     SyncComputeResult result = new SyncComputeResult();
     try {
-      result = basicComputeSync.computeSync(jcmsProject, pluginProject, config, result);
+      result = basicComputeSync.computeSync(conf, result);
       SyncUtil.runSync(result);
 
       // all files in new plugin project must go to the jcms webapp project
@@ -92,12 +96,12 @@ public class SyncTest {
   @Test
   public void syncNoChange() {
     ISync basicComputeSync = (ISync) context.getBean("basicComputeSync");
-    SyncConfiguration config = new SyncConfiguration();
+    SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
     SyncComputeResult result1 = new SyncComputeResult();
     SyncComputeResult result2 = new SyncComputeResult();
 
     try {
-      result1 = basicComputeSync.computeSync(jcmsProject, pluginProject, config, result1);
+      result1 = basicComputeSync.computeSync(conf, result1);
       SyncUtil.runSync(result1);
 
       // all files in new plugin project must go to the jcms webapp project
@@ -107,7 +111,7 @@ public class SyncTest {
       assertEquals(result1.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
 
       // sync again
-      result2 = basicComputeSync.computeSync(jcmsProject, pluginProject, config, result2);
+      result2 = basicComputeSync.computeSync(conf, result2);
       SyncUtil.runSync(result2);
       assertEquals(result2.getSyncFiles(Direction.TO_WEBAPP).size(), 0);
       assertEquals(result2.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
@@ -117,24 +121,15 @@ public class SyncTest {
     }
   }
 
-  @Test
-  public void syncException() {
-    // TODO
-  }
-
-  @Test
-  public void syncPreview() {
-    // TODO
-  }
 
   @Test
   public void syncNewFileInJcmsProject() {
     ISync basicComputeSync = (ISync) context.getBean("basicComputeSync");
-    SyncConfiguration config = new SyncConfiguration();
+    SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
     SyncComputeResult result1 = new SyncComputeResult();
 
     try {
-      result1 = basicComputeSync.computeSync(jcmsProject, pluginProject, config, result1);
+      result1 = basicComputeSync.computeSync(conf, result1);
       SyncUtil.runSync(result1);
 
       // all files in new plugin project must go to the jcms webapp project
@@ -144,23 +139,22 @@ public class SyncTest {
       assertEquals(result1.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
 
       // file created in jcms project is not synced in basic compute sync
-      new File(jcmsProject, "plugins/TestPlugin/css/newStyle.css").createNewFile();
+      new File(webappRootDirProject, "plugins/TestPlugin/css/newStyle.css").createNewFile();
       SyncComputeResult result2 = new SyncComputeResult();
-      basicComputeSync.computeSync(jcmsProject, pluginProject, config, result2);
+      basicComputeSync.computeSync(conf, result2);
       SyncUtil.runSync(result2);
       assertEquals(result2.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
 
       // file created in plugin project is still synced in basic compute sync
-      new File(pluginProject, "plugins/TestPlugin/css/newStyle.css").createNewFile();
+      new File(pluginProjectRootDir, "plugins/TestPlugin/css/newStyle.css").createNewFile();
       SyncComputeResult result3 = new SyncComputeResult();
-      result3 = basicComputeSync.computeSync(jcmsProject, pluginProject, config, result3);
+      result3 = basicComputeSync.computeSync(conf, result3);
       SyncUtil.runSync(result3);
       assertEquals(result3.getSyncFiles(Direction.TO_WEBAPP).size(), 1);
 
     } catch (SyncException e) {
       e.printStackTrace();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
