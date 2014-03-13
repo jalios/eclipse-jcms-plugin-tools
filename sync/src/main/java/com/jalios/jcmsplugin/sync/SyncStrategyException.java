@@ -13,6 +13,6 @@
  */
 package com.jalios.jcmsplugin.sync;
 
-public class SyncException extends Exception {
+public class SyncStrategyException extends Exception {
 
 }

@@ -2,13 +2,13 @@ package com.jalios.jcmsplugin.sync;
 
 import java.io.File;
 
-public final class SyncConfiguration {
+public final class SyncStrategyConfiguration {
   private File ppRootDir;
   private File wpRootDir;
   private String confPath;
   private boolean preview = false;
   
-  private SyncConfiguration(Builder b) {
+  private SyncStrategyConfiguration(Builder b) {
     this.ppRootDir = b.ppRootDir;
     this.wpRootDir = b.wpRootDir;
     this.confPath = b.confPath;
@@ -45,8 +45,8 @@ public final class SyncConfiguration {
       return this;
     }
 
-    public SyncConfiguration build() {
-      return new SyncConfiguration(this);
+    public SyncStrategyConfiguration build() {
+      return new SyncStrategyConfiguration(this);
     }
   }
 }

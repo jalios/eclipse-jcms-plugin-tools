@@ -18,7 +18,7 @@ package com.jalios.jcmsplugin.sync;
  * @author Xuan Tuong LE - lxtuong@gmail.com
  *
  */
-public interface ISync {
-  public void computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException;
+public interface SyncStrategy {
+  public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException;
 
 }

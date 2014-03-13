@@ -42,6 +42,7 @@ public class SyncTest {
 
   @Before
   public void setUp() {
+
     tmpWebappProject = SyncUtil.createTempDir();
     webappRootDirProject = new File(tmpWebappProject, "webappproject");
     webappRootDirProject.mkdirs();
@@ -49,7 +50,7 @@ public class SyncTest {
     logger.info("Create webapp project at " + webappRootDirProject.getAbsolutePath());
 
     tmpPluginProject = SyncUtil.createTempDir();
-    pluginProjectRootDir = new File(tmpPluginProject, "pluginproject");
+    pluginProjectRootDir = new File(tmpPluginProject, "TestPlugin");
     pluginProjectRootDir.mkdirs();
     createLightPluginProject(pluginProjectRootDir);
     logger.info("Create plugin project at " + pluginProjectRootDir.getAbsolutePath());
@@ -57,6 +58,7 @@ public class SyncTest {
 
   @After
   public void tearDown() {
+
     try {
       FileUtils.deleteDirectory(tmpWebappProject);
       FileUtils.deleteDirectory(tmpPluginProject);
@@ -68,73 +70,58 @@ public class SyncTest {
 
   @Test
   public void syncNewPluginProject() {
-    // run a sync
-    ISync sync = (ISync) context.getBean("sync");
-    SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
-    SyncComputeResult result = new SyncComputeResult();
+    SyncStrategy strategy = (SyncStrategy) context.getBean("strategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectRootDir,
+        webappRootDirProject).build();
     try {
-      sync.computeSync(conf, result);
-      result.run();
-      assertEquals(result.countSyncFilesToWebapp(), 9);
-      assertEquals(result.countSyncFilesToPlugin(), 0);
-    } catch (SyncException e) {
+      SyncStrategyReport report = strategy.run(configuration);
+      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 9);
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+    } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
 
   @Test
   public void syncNoChange() {
-    ISync sync = (ISync) context.getBean("sync");
-    SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
-    SyncComputeResult result1 = new SyncComputeResult();
-    SyncComputeResult result2 = new SyncComputeResult();
-
+    SyncStrategy strategy = (SyncStrategy) context.getBean("strategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectRootDir,
+        webappRootDirProject).build();
     try {
-      sync.computeSync(conf, result1);
-      assertEquals(result1.countSyncFilesToWebapp(), 9);
-      assertEquals(result1.countSyncFilesToPlugin(), 0);
-      result1.run();
+      SyncStrategyReport report = strategy.run(configuration);
+      assertEquals(report.countSyncFilesToWebapp(), 9);
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+      report.run(new CopyExecutor());
 
-      // sync again
-      sync.computeSync(conf, result2);
-      assertEquals(result2.countSyncFilesToWebapp(), 0);
-      assertEquals(result2.countSyncFilesToPlugin(), 0);
-      result2.run();
+      report = strategy.run(configuration);
+      assertEquals(report.countSyncFilesToWebapp(), 0);
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+      report.run(new CopyExecutor());
 
-    } catch (SyncException e) {
+    } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
 
   @Test
-  public void syncNewFileInJcmsProject() {
-    ISync sync = (ISync) context.getBean("sync");
-    SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
-    SyncComputeResult result1 = new SyncComputeResult();
-    SyncComputeResult result2 = new SyncComputeResult();
-    SyncComputeResult result3 = new SyncComputeResult();
+  public void syncModifiedFileJcmsProject() {
+    SyncStrategy strategy = (SyncStrategy) context.getBean("strategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectRootDir,
+        webappRootDirProject).build();
 
     try {
-      sync.computeSync(conf, result1);
-      result1.run();
-      assertEquals(result1.countSyncFilesToWebapp(), 9);
-      assertEquals(result1.countSyncFilesToPlugin(), 0);
-
-      File tmp = new File(webappRootDirProject, "plugins/TestPlugin/css/newStyle.css");
-      tmp.createNewFile();
-      System.out.println("==> "+ tmp.getAbsolutePath());
-      sync.computeSync(conf, result2);
-      result2.run();
-      System.out.println(result2);
-      assertEquals(result2.countSyncFilesToPlugin(), 1);
-
-      // file created in plugin project is still synced in basic compute sync
+      SyncStrategyReport report = strategy.run(configuration);      
+      assertEquals(report.countSyncFilesToWebapp(), 9);
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+      report.run(new CopyExecutor());
+      
       new File(pluginProjectRootDir, "plugins/TestPlugin/css/newStyle.css").createNewFile();
-      sync.computeSync(conf, result3);
-      result3.run();
-      assertEquals(result3.countSyncFilesToWebapp(), 1);
+      report = strategy.run(configuration);
+      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 1);
 
-    } catch (SyncException e) {
+    } catch (SyncStrategyException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
