@@ -2,6 +2,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-	<bean id="basicComputeSync" class="com.jalios.jcmsplugin.sync.BasicSyncCompute">
+    <bean id="basicSyncCompute" class="com.jalios.jcmsplugin.sync.BasicSyncCompute">		
+	</bean>
+	<bean id="impliciteSync" class="com.jalios.jcmsplugin.sync.ImpliciteSyncCompute">		
+	</bean>
+	<bean id="sync" class="com.jalios.jcmsplugin.sync.GlobalSyncCompute">
+		<property name="basicSyncCompute">
+		  <ref bean="basicSyncCompute"/>
+		</property>
+		<property name="impliciteSyncCompute">
+		  <ref bean="impliciteSync"/>
+		</property>
 	</bean>
 </beans>

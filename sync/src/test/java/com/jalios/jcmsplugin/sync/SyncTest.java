@@ -26,13 +26,6 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.jalios.jcmsplugin.sync.Direction;
-import com.jalios.jcmsplugin.sync.ISync;
-import com.jalios.jcmsplugin.sync.SyncComputeResult;
-import com.jalios.jcmsplugin.sync.SyncConfiguration;
-import com.jalios.jcmsplugin.sync.SyncException;
-import com.jalios.jcmsplugin.sync.SyncUtil;
-
 /**
  * Test different sync situation
  * 
@@ -76,18 +69,14 @@ public class SyncTest {
   @Test
   public void syncNewPluginProject() {
     // run a sync
-    ISync basicComputeSync = (ISync) context.getBean("basicComputeSync");
+    ISync sync = (ISync) context.getBean("sync");
     SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
     SyncComputeResult result = new SyncComputeResult();
     try {
-      result = basicComputeSync.computeSync(conf, result);
-      SyncUtil.runSync(result);
-
-      // all files in new plugin project must go to the jcms webapp project
-      assertEquals(result.getSyncFiles(Direction.TO_WEBAPP).size(), 9);
-
-      // no files go in plugin project
-      assertEquals(result.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
+      sync.computeSync(conf, result);
+      result.run();
+      assertEquals(result.countSyncFilesToWebapp(), 9);
+      assertEquals(result.countSyncFilesToPlugin(), 0);
     } catch (SyncException e) {
       e.printStackTrace();
     }
@@ -95,62 +84,55 @@ public class SyncTest {
 
   @Test
   public void syncNoChange() {
-    ISync basicComputeSync = (ISync) context.getBean("basicComputeSync");
+    ISync sync = (ISync) context.getBean("sync");
     SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
     SyncComputeResult result1 = new SyncComputeResult();
     SyncComputeResult result2 = new SyncComputeResult();
 
     try {
-      result1 = basicComputeSync.computeSync(conf, result1);
-      SyncUtil.runSync(result1);
-
-      // all files in new plugin project must go to the jcms webapp project
-      assertEquals(result1.getSyncFiles(Direction.TO_WEBAPP).size(), 9);
-
-      // no files go in plugin project
-      assertEquals(result1.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
+      sync.computeSync(conf, result1);
+      assertEquals(result1.countSyncFilesToWebapp(), 9);
+      assertEquals(result1.countSyncFilesToPlugin(), 0);
+      result1.run();
 
       // sync again
-      result2 = basicComputeSync.computeSync(conf, result2);
-      SyncUtil.runSync(result2);
-      assertEquals(result2.getSyncFiles(Direction.TO_WEBAPP).size(), 0);
-      assertEquals(result2.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
+      sync.computeSync(conf, result2);
+      assertEquals(result2.countSyncFilesToWebapp(), 0);
+      assertEquals(result2.countSyncFilesToPlugin(), 0);
+      result2.run();
 
     } catch (SyncException e) {
       e.printStackTrace();
     }
   }
 
-
   @Test
   public void syncNewFileInJcmsProject() {
-    ISync basicComputeSync = (ISync) context.getBean("basicComputeSync");
+    ISync sync = (ISync) context.getBean("sync");
     SyncConfiguration conf = new SyncConfiguration.Builder(pluginProjectRootDir, webappRootDirProject).build();
     SyncComputeResult result1 = new SyncComputeResult();
+    SyncComputeResult result2 = new SyncComputeResult();
+    SyncComputeResult result3 = new SyncComputeResult();
 
     try {
-      result1 = basicComputeSync.computeSync(conf, result1);
-      SyncUtil.runSync(result1);
+      sync.computeSync(conf, result1);
+      result1.run();
+      assertEquals(result1.countSyncFilesToWebapp(), 9);
+      assertEquals(result1.countSyncFilesToPlugin(), 0);
 
-      // all files in new plugin project must go to the jcms webapp project
-      assertEquals(result1.getSyncFiles(Direction.TO_WEBAPP).size(), 9);
-
-      // no files go in plugin project
-      assertEquals(result1.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
-
-      // file created in jcms project is not synced in basic compute sync
-      new File(webappRootDirProject, "plugins/TestPlugin/css/newStyle.css").createNewFile();
-      SyncComputeResult result2 = new SyncComputeResult();
-      basicComputeSync.computeSync(conf, result2);
-      SyncUtil.runSync(result2);
-      assertEquals(result2.getSyncFiles(Direction.TO_PLUGIN).size(), 0);
+      File tmp = new File(webappRootDirProject, "plugins/TestPlugin/css/newStyle.css");
+      tmp.createNewFile();
+      System.out.println("==> "+ tmp.getAbsolutePath());
+      sync.computeSync(conf, result2);
+      result2.run();
+      System.out.println(result2);
+      assertEquals(result2.countSyncFilesToPlugin(), 1);
 
       // file created in plugin project is still synced in basic compute sync
       new File(pluginProjectRootDir, "plugins/TestPlugin/css/newStyle.css").createNewFile();
-      SyncComputeResult result3 = new SyncComputeResult();
-      result3 = basicComputeSync.computeSync(conf, result3);
-      SyncUtil.runSync(result3);
-      assertEquals(result3.getSyncFiles(Direction.TO_WEBAPP).size(), 1);
+      sync.computeSync(conf, result3);
+      result3.run();
+      assertEquals(result3.countSyncFilesToWebapp(), 1);
 
     } catch (SyncException e) {
       e.printStackTrace();

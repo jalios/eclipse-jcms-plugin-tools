@@ -14,19 +14,24 @@
 package com.jalios.jcmsplugin.sync;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
- * Sync compute result 
+ * Sync compute result
+ * 
  * @author Xuan Tuong LE (lxuong@gmail.com)
  * 
  */
 public final class SyncComputeResult {
-  private Map<Direction, List<SyncFile>> map;
+  enum Direction {
+    TO_WEBAPP, TO_PLUGIN;
+  }
+
+  private final Map<Direction, List<SyncFile>> map;
 
   public SyncComputeResult() {
     map = new HashMap<>();
@@ -34,12 +39,51 @@ public final class SyncComputeResult {
     map.put(Direction.TO_PLUGIN, new ArrayList<SyncFile>());
   }
 
-  public List<SyncFile> getSyncFiles(Direction dir) {
-    return map.get(dir);
+  public void addSyncFilesToPlugin(File src, File target) {
+    map.get(Direction.TO_PLUGIN).add(new SyncFile(src, target));
   }
 
-  public void addSyncFiles(File filePluginProject, Direction dir, File fileJcmsProject) {
-    map.get(dir).add(new SyncFile(filePluginProject, fileJcmsProject));
+  public void addSyncFilesToWebapp(File src, File target) {
+    map.get(Direction.TO_WEBAPP).add(new SyncFile(src, target));
+  }
+
+  public int countSyncFilesToWebapp() {
+    return map.get(Direction.TO_WEBAPP).size();
+  }
+
+  public int countSyncFilesToPlugin() {
+    return map.get(Direction.TO_PLUGIN).size();
+  }
+
+  public void run() {
+    for (SyncFile sf : map.get(Direction.TO_WEBAPP)) {
+      try {
+        SyncUtil.copyFile(sf.getSrc(), sf.getTgt());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    for (SyncFile sf : map.get(Direction.TO_PLUGIN)) {
+      try {
+        SyncUtil.copyFile(sf.getSrc(), sf.getTgt());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    for (SyncFile sf : map.get(Direction.TO_WEBAPP)) {
+      str.append("P->W : " + sf.getTgt().getAbsolutePath()).append("\n");
+    }
+
+    for (SyncFile sf : map.get(Direction.TO_PLUGIN)) {
+      str.append("W->P : " + sf.getTgt().getAbsolutePath()).append("\n");
+    }
+    return str.toString();
   }
 
 }

@@ -19,6 +19,6 @@ package com.jalios.jcmsplugin.sync;
  *
  */
 public interface ISync {
-  public SyncComputeResult computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException;
+  public void computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException;
 
 }

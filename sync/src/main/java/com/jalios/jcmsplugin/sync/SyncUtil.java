@@ -255,26 +255,4 @@ public class SyncUtil {
     }
   }
   
-  public static void runSync(SyncComputeResult result){
-    // apply sync or preview here
-    if (result.getSyncFiles(Direction.TO_WEBAPP) != null) {
-      for (SyncFile sf : result.getSyncFiles(Direction.TO_WEBAPP)){
-        try {
-          SyncUtil.copyFile(sf.getSrc(), sf.getTgt());
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-
-    if (result.getSyncFiles(Direction.TO_PLUGIN) != null) {
-      for (SyncFile sf : result.getSyncFiles(Direction.TO_PLUGIN)){
-        try {
-          SyncUtil.copyFile(sf.getSrc(), sf.getTgt());
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-  }
 }

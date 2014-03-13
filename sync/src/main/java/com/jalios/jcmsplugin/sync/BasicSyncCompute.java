@@ -15,48 +15,44 @@ package com.jalios.jcmsplugin.sync;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
+ * Basic sync from legacy implementation at Jalios Delete is not taken in
+ * account. This class is only for package visibility
  * 
  * @author Xuan Tuong LE (lxuong@gmail.com)
  */
-public final class BasicSyncCompute implements ISync {
+final class BasicSyncCompute implements ISync {
 
   @Override
-  public SyncComputeResult computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException {   
+  public void computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException {
     File wpRootDir = conf.getWebappProjectRootDir();
     File ppRootDir = conf.getPluginProjectRootDir();
-    List<File> subDirPluginProject = SyncUtil.listDirectoryFirstLevel(ppRootDir);
+    List<File> ppSubDir = SyncUtil.listDirectoryFirstLevel(ppRootDir);
 
-    List<File> filePluginProjectList = new ArrayList<File>();
-    if (subDirPluginProject == null || subDirPluginProject.size() == 0) {
-      filePluginProjectList = SyncUtil.deepListFiles(ppRootDir, new BlackListFilter());
+    List<File> ppFileList = new ArrayList<File>();
+    if (ppSubDir == null || ppSubDir.size() == 0) {
+      ppFileList = SyncUtil.deepListFiles(ppRootDir, new BlackListFilter());
     } else {
-      for (Iterator<File> it = subDirPluginProject.iterator(); it.hasNext();) {
-        File itDir = (File) it.next();
-        filePluginProjectList.addAll(SyncUtil.deepListFiles(itDir, new BlackListFilter()));
+      for (File itDir : ppSubDir) {
+        ppFileList.addAll(SyncUtil.deepListFiles(itDir, new BlackListFilter()));
       }
     }
 
-    // Iterates over the src files
-    for (Iterator<File> it = filePluginProjectList.iterator(); it.hasNext();) {
-      File filePluginProject = (File) it.next();
+    for (File src : ppFileList) {
       // Get the related tgtFile
-      String filePluginProjectRelativePath = SyncUtil.getRelativePath(ppRootDir, filePluginProject);
-      File fileJcmsProject = new File(wpRootDir, filePluginProjectRelativePath);
+      String targetRelPath = SyncUtil.getRelativePath(ppRootDir, src);
+      File target = new File(wpRootDir, targetRelPath);
 
-      if (fileJcmsProject == null || fileJcmsProject.lastModified() < filePluginProject.lastModified()) {
-        result.addSyncFiles(filePluginProject, Direction.TO_WEBAPP, fileJcmsProject);
+      if (target == null || target.lastModified() < src.lastModified()) {
+        result.addSyncFilesToWebapp(src, target);
         continue;
       }
 
-      if (fileJcmsProject.lastModified() > filePluginProject.lastModified()) {
-        result.addSyncFiles(fileJcmsProject, Direction.TO_PLUGIN, filePluginProject);
+      if (target.lastModified() > src.lastModified()) {
+        result.addSyncFilesToPlugin(target, src);
       }
     }
-
-    return result;
   }
 }

@@ -1,14 +1,32 @@
 package com.jalios.jcmsplugin.sync;
 
+/*
+GNU LESSER GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+
+
+This version of the GNU Lesser General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License
+*/
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ImpliciteSyncCompute implements ISync {
+/**
+ * This class is only for package visibility
+ * @author Xuan Tuong LE - lxtuong@gmail.com
+ *
+ */
+final class ImpliciteSyncCompute implements ISync {
 
   @Override
-  public SyncComputeResult computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException {
+  public void computeSync(SyncConfiguration conf, SyncComputeResult result) throws SyncException {
     File wpRootDir = conf.getWebappProjectRootDir();
     File ppRootDir = conf.getPluginProjectRootDir();
     List<File> fileList = new ArrayList<File>();
@@ -26,10 +44,8 @@ public class ImpliciteSyncCompute implements ISync {
 
       // tgtFile is missing or older, copy srcFile -> tgtFile
       if (pluginFile == null || pluginFile.lastModified() < webappFile.lastModified() ) {
-        result.addSyncFiles(webappFile, Direction.TO_PLUGIN, pluginFile);
+        result.addSyncFilesToPlugin(webappFile, pluginFile);
       }
     }
-
-    return result;
   }
 }
