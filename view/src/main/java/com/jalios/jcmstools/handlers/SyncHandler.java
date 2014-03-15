@@ -64,7 +64,7 @@ public class SyncHandler extends AbstractHandler {
       
     initProject(event);
     
-    if (isInitOK()){
+    if (!isInitOK()){
       return null;
     }   
 
