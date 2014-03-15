@@ -1,30 +1,25 @@
 package com.jalios.jcmstools.handlers;
 
 import java.io.File;
-import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.jalios.jcmsplugin.sync.BasicSyncCompute;
-import com.jalios.jcmsplugin.sync.Direction;
-import com.jalios.jcmsplugin.sync.ISync;
-import com.jalios.jcmsplugin.sync.ImpliciteSyncCompute;
-import com.jalios.jcmsplugin.sync.SyncComputeResult;
-import com.jalios.jcmsplugin.sync.SyncConfiguration;
-import com.jalios.jcmsplugin.sync.SyncException;
-import com.jalios.jcmsplugin.sync.SyncFile;
-import com.jalios.jcmsplugin.sync.SyncUtil;
+import com.jalios.jcmsplugin.sync.CopyExecutor;
+import com.jalios.jcmsplugin.sync.FileSyncStrategy;
+import com.jalios.jcmsplugin.sync.NewWebappFileStrategy;
+import com.jalios.jcmsplugin.sync.SyncStrategy;
+import com.jalios.jcmsplugin.sync.SyncStrategyConfiguration;
+import com.jalios.jcmsplugin.sync.SyncStrategyException;
+import com.jalios.jcmsplugin.sync.SyncStrategyReport;
 import com.jalios.jcmstools.transversal.JPTUtil;
 
 /**
@@ -37,6 +32,7 @@ public class SyncAllHandler extends AbstractHandler {
   public static final String ID = "SyncAllHandler";
   public static final String ID_PREVIEW_CMD = "com.jalios.commands.previewall";
   private static final String CONSOLE_NAME = "Jalios Plugin Tools - Sync Status";
+  private boolean preview = true;
 
   /**
    * The constructor.
@@ -58,13 +54,12 @@ public class SyncAllHandler extends AbstractHandler {
    */
   public Object execute(ExecutionEvent event) throws ExecutionException {
     IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-    boolean preview = false;
-    if (isPreview(event.getCommand())) {
-      preview = true;
-    } else {
-      boolean go = MessageDialog.openConfirm(window.getShell(), "Sync All",
+    preview = isPreview(event.getCommand());
+
+    if (!preview) {
+      boolean isSyncAllConfirmed = MessageDialog.openConfirm(window.getShell(), "Sync All",
           "Are you sure to sync all JCMS Plugin Project ?");
-      if (!go) {
+      if (!isSyncAllConfirmed) {
         return null;
       }
     }
@@ -81,8 +76,8 @@ public class SyncAllHandler extends AbstractHandler {
       IProject jcmsWebappProject = JPTUtil.getJcmsWebappProject(jcmsPluginProject);
 
       if (jcmsWebappProject == null) {
-        stream.println("Please link the JCMSPlugin project to a webapp project. Right-click on "
-            + jcmsPluginProject + " > Properties > Project References > Choose the webapp project");
+        stream.println("Please link the JCMSPlugin project to a webapp project. Right-click on " + jcmsPluginProject
+            + " > Properties > Project References > Choose the webapp project");
         stream.println("Operation aborted.");
         break; // next project
       }
@@ -91,45 +86,37 @@ public class SyncAllHandler extends AbstractHandler {
       String cfPath = JPTUtil.getSyncConfPath(jcmsWebappProject);
       File ppPath = jcmsPluginProject.getLocation().toFile();
       File wpPath = new File(JPTUtil.getWebappRootdir(jcmsWebappProject));
-      SyncConfiguration conf = new SyncConfiguration.Builder(ppPath, wpPath).conf(cfPath).build();
+      SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(ppPath, wpPath).conf(cfPath).build();
 
-      if (preview) {
-        conf.enablePreview();
-      }
-      
-      SyncComputeResult result = new SyncComputeResult();
-      ISync basicComputeSync = new BasicSyncCompute();
-      ISync impliciteComputeSync = new ImpliciteSyncCompute();
-      try {
-        result = basicComputeSync.computeSync(conf, result);
-        result = impliciteComputeSync.computeSync(conf, result);
-        SyncUtil.runSync(result);
-        List<SyncFile> sfToPluginList = result.getSyncFiles(Direction.TO_PLUGIN);
-        stream.println("W->P : " + sfToPluginList.size() + " files");
-        for (SyncFile sf : sfToPluginList){
-          stream.println("W->P : " + sf.getTgt());
-        }
-        List<SyncFile> sfToWebappList = result.getSyncFiles(Direction.TO_WEBAPP);
-        stream.println("P->W : " + sfToWebappList.size() + " files");
-        for (SyncFile sf : sfToWebappList){
-          stream.println("P->W : " + sf.getTgt());
-        }
-      } catch (SyncException e) {
-        e.printStackTrace();
-      }
-
-      // refresh
-      try {
-        jcmsPluginProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-        jcmsWebappProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-      } catch (CoreException e) {
-        e.printStackTrace();
-      }
+      run(conf, preview);
+      SyncHandlerUtil.refreshProject(jcmsPluginProject);
+      SyncHandlerUtil.refreshProject(jcmsWebappProject);
 
       stream.println("\n---------------------------------------------------");
       stream.println("END Sync for project '" + jcmsPluginProject + "'");
       stream.println("---------------------------------------------------\n");
     }
     return null;
+  }
+
+  private void run(SyncStrategyConfiguration configuration, boolean isPreview) {
+    SyncStrategyReport report1 = new SyncStrategyReport();
+    SyncStrategyReport report2 = new SyncStrategyReport();
+
+    SyncStrategy fileSync = new FileSyncStrategy();
+    SyncStrategy newWebappFileStrategy = new NewWebappFileStrategy();
+    try {
+      report1 = fileSync.run(configuration);
+      if (!isPreview) {
+        report1.run(new CopyExecutor());
+      }
+      report2 = newWebappFileStrategy.run(configuration);
+      if (!isPreview) {
+        report2.run(new CopyExecutor());
+      }
+
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
+    }
   }
 }
