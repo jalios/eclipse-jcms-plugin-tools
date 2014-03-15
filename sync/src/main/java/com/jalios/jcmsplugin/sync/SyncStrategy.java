@@ -14,7 +14,8 @@
 package com.jalios.jcmsplugin.sync;
 
 /**
- * 
+ * A strategy don't execute anything
+ * It'll only return a report which will be treated by an executor dedicated
  * @author Xuan Tuong LE - lxtuong@gmail.com
  *
  */

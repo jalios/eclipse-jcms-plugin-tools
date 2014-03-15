@@ -4,7 +4,7 @@
 	<groupId>com.jalios.jcmsplugin.sync</groupId>
 	<artifactId>sync</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>2.0</version>
 	<name>sync</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>

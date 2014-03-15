@@ -255,4 +255,9 @@ public class SyncUtil {
     }
   }
   
+  public static File getDestinationFile(File destinationDirectory, File sourceDirectory, File file) {
+    String fileRelativePath = getRelativePath(sourceDirectory, file);
+    return new File(destinationDirectory, fileRelativePath);
+  }
+  
 }

@@ -34,7 +34,7 @@ public final class NewWebappFileStrategy implements SyncStrategy {
     List<File> webappFiles = getFilesInPluginPublicDirectory(webappProjectDirectory, pluginProjectDirectory.getName());
 
     for (File webappFile : webappFiles) {
-      File pluginFile = getPluginFile(pluginProjectDirectory, webappProjectDirectory, webappFile);
+      File pluginFile = SyncUtil.getDestinationFile(pluginProjectDirectory, webappProjectDirectory, webappFile);
 
       if (pluginFile == null || pluginFile.lastModified() < webappFile.lastModified()) {
         report.addCopyReport(webappFile, pluginFile, SyncStrategyReport.Direction.TO_PLUGIN);
@@ -51,10 +51,5 @@ public final class NewWebappFileStrategy implements SyncStrategy {
     }
     return files;
 
-  }
-
-  private File getPluginFile(File pluginProjectDirectory, File webappProjectDirectory, File webappFile) {
-    String pluginFileRelativePath = SyncUtil.getRelativePath(webappProjectDirectory, webappFile);
-    return new File(pluginProjectDirectory, pluginFileRelativePath);
   }
 }

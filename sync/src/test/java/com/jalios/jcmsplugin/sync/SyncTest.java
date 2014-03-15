@@ -34,34 +34,82 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class SyncTest {
   private static Logger logger = Logger.getLogger(SyncTest.class);
   private ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
-  private File tmpWebappProject;
-  private File tmpPluginProject;
+  private File tmpWebappProjectTestDirectory;
+  private File tmpPluginProjectTestDirectory;
 
-  private File webappRootDirProject;
-  private File pluginProjectRootDir;
+  private File webappProjectDirectory;
+  private File pluginProjectDirectory;
 
   @Before
   public void setUp() {
+    tmpWebappProjectTestDirectory = SyncUtil.createTempDir();
+    webappProjectDirectory = new File(tmpWebappProjectTestDirectory, "webappproject");
+    webappProjectDirectory.mkdirs();
+    createLightJcmsProjectStructure();
+    logger.debug("Create webapp project at " + webappProjectDirectory.getAbsolutePath());
 
-    tmpWebappProject = SyncUtil.createTempDir();
-    webappRootDirProject = new File(tmpWebappProject, "webappproject");
-    webappRootDirProject.mkdirs();
-    createLightJcmsProject(webappRootDirProject);
-    logger.info("Create webapp project at " + webappRootDirProject.getAbsolutePath());
-
-    tmpPluginProject = SyncUtil.createTempDir();
-    pluginProjectRootDir = new File(tmpPluginProject, "TestPlugin");
-    pluginProjectRootDir.mkdirs();
-    createLightPluginProject(pluginProjectRootDir);
-    logger.info("Create plugin project at " + pluginProjectRootDir.getAbsolutePath());
+    tmpPluginProjectTestDirectory = SyncUtil.createTempDir();
+    pluginProjectDirectory = new File(tmpPluginProjectTestDirectory, "TestPlugin");
+    pluginProjectDirectory.mkdirs();
+    createLightPluginProjectStructure();
+    logger.debug("Create plugin project at " + pluginProjectDirectory.getAbsolutePath());
   }
 
   @After
   public void tearDown() {
+    try {
+      FileUtils.deleteDirectory(tmpWebappProjectTestDirectory);
+      FileUtils.deleteDirectory(tmpPluginProjectTestDirectory);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  private void createLightJcmsProjectStructure() {
+    new File(webappProjectDirectory, "admin").mkdirs();
+    new File(webappProjectDirectory, "css").mkdirs();
+    new File(webappProjectDirectory, "custom").mkdirs();
+    new File(webappProjectDirectory, "feed").mkdirs();
+    new File(webappProjectDirectory, "front").mkdirs();
+    new File(webappProjectDirectory, "flash").mkdirs();
+    new File(webappProjectDirectory, "images").mkdirs();
+    new File(webappProjectDirectory, "jcore").mkdirs();
+    new File(webappProjectDirectory, "js").mkdirs();
+    new File(webappProjectDirectory, "types").mkdirs();
+    new File(webappProjectDirectory, "WEB-INF/classes").mkdirs();
+    new File(webappProjectDirectory, "work").mkdirs();
+    try {
+      new File(webappProjectDirectory, "display.jsp").createNewFile();
+      new File(webappProjectDirectory, "edit.jsp").createNewFile();
+      new File(webappProjectDirectory, "index.jsp").createNewFile();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void createLightPluginProjectStructure() {
+    new File(pluginProjectDirectory, "plugins/TestPlugin/css").mkdirs();
+    new File(pluginProjectDirectory, "plugins/TestPlugin/docs").mkdirs();
+    new File(pluginProjectDirectory, "plugins/TestPlugin/js").mkdirs();
+    new File(pluginProjectDirectory, "plugins/TestPlugin/types/PortletQueryForeachDetail").mkdirs();
+    new File(pluginProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages").mkdirs();
+    new File(pluginProjectDirectory, "WEB-INF/classes/com/jalios/test/plugin").mkdirs();
 
     try {
-      FileUtils.deleteDirectory(tmpWebappProject);
-      FileUtils.deleteDirectory(tmpPluginProject);
+      // 9 files
+      new File(pluginProjectDirectory, "plugins/TestPlugin/css/plugin.css").createNewFile();
+      new File(pluginProjectDirectory, "plugins/TestPlugin/css/test.css").createNewFile();
+      new File(pluginProjectDirectory, "plugins/TestPlugin/docs/changelog.txt").createNewFile();
+      new File(pluginProjectDirectory, "plugins/TestPlugin/js/plugin.js").createNewFile();
+      new File(pluginProjectDirectory, "plugins/TestPlugin/types/PortletQueryForeachDetail/template.jsp")
+          .createNewFile();
+      new File(pluginProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages/en.prop").createNewFile();
+      new File(pluginProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages/fr.prop").createNewFile();
+      new File(pluginProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/plugin.xml").createNewFile();
+      new File(pluginProjectDirectory, "WEB-INF/classes/com/jalios/test/plugin/BasicDataController.java")
+          .createNewFile();
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -71,8 +119,8 @@ public class SyncTest {
   @Test
   public void syncNewPluginProject() {
     SyncStrategy strategy = (SyncStrategy) context.getBean("strategy");
-    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectRootDir,
-        webappRootDirProject).build();
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
     try {
       SyncStrategyReport report = strategy.run(configuration);
       report.run(new CopyExecutor());
@@ -83,11 +131,12 @@ public class SyncTest {
     }
   }
 
+  
   @Test
   public void syncNoChange() {
     SyncStrategy strategy = (SyncStrategy) context.getBean("strategy");
-    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectRootDir,
-        webappRootDirProject).build();
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
     try {
       SyncStrategyReport report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToWebapp(), 9);
@@ -107,16 +156,16 @@ public class SyncTest {
   @Test
   public void syncModifiedFileJcmsProject() {
     SyncStrategy strategy = (SyncStrategy) context.getBean("strategy");
-    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectRootDir,
-        webappRootDirProject).build();
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
 
     try {
-      SyncStrategyReport report = strategy.run(configuration);      
+      SyncStrategyReport report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToWebapp(), 9);
       assertEquals(report.countSyncFilesToPlugin(), 0);
       report.run(new CopyExecutor());
-      
-      new File(pluginProjectRootDir, "plugins/TestPlugin/css/newStyle.css").createNewFile();
+
+      new File(pluginProjectDirectory, "plugins/TestPlugin/css/newStyle.css").createNewFile();
       report = strategy.run(configuration);
       report.run(new CopyExecutor());
       assertEquals(report.countSyncFilesToWebapp(), 1);
@@ -127,53 +176,34 @@ public class SyncTest {
       e.printStackTrace();
     }
   }
+  
+  /**
+   * Only true if the plugin project name is the same as plugin name 
+   */
+  @Test
+  public void syncNewPublicPluginFileFromWebappProject() {
+    SyncStrategy fileSyncStrategy = (SyncStrategy) context.getBean("strategy");
+    SyncStrategy newWebappFileStrategy = new NewWebappFileStrategy();    
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
 
-  private void createLightJcmsProject(File jcmsProjectRootDir) {
-    new File(jcmsProjectRootDir, "admin").mkdirs();
-    new File(jcmsProjectRootDir, "css").mkdirs();
-    new File(jcmsProjectRootDir, "custom").mkdirs();
-    new File(jcmsProjectRootDir, "feed").mkdirs();
-    new File(jcmsProjectRootDir, "front").mkdirs();
-    new File(jcmsProjectRootDir, "flash").mkdirs();
-    new File(jcmsProjectRootDir, "images").mkdirs();
-    new File(jcmsProjectRootDir, "jcore").mkdirs();
-    new File(jcmsProjectRootDir, "js").mkdirs();
-    new File(jcmsProjectRootDir, "types").mkdirs();
-    new File(jcmsProjectRootDir, "WEB-INF/classes").mkdirs();
-    new File(jcmsProjectRootDir, "work").mkdirs();
     try {
-      new File(jcmsProjectRootDir, "display.jsp").createNewFile();
-      new File(jcmsProjectRootDir, "edit.jsp").createNewFile();
-      new File(jcmsProjectRootDir, "index.jsp").createNewFile();
+      SyncStrategyReport report = fileSyncStrategy.run(configuration);
+      assertEquals(report.countSyncFilesToWebapp(), 9);
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+      report.run(new CopyExecutor());
+
+      new File(webappProjectDirectory, "plugins/TestPlugin/css/newStyle.css").createNewFile();
+      report = newWebappFileStrategy.run(configuration);
+      assertEquals(report.countSyncFilesToPlugin(), 1);      
+      assertEquals(report.countSyncFilesToWebapp(), 0);
+      report.run(new CopyExecutor());          
+      
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private void createLightPluginProject(File pluginProjectRootDir) {
-
-    new File(pluginProjectRootDir, "plugins/TestPlugin/css").mkdirs();
-    new File(pluginProjectRootDir, "plugins/TestPlugin/docs").mkdirs();
-    new File(pluginProjectRootDir, "plugins/TestPlugin/js").mkdirs();
-    new File(pluginProjectRootDir, "plugins/TestPlugin/types/PortletQueryForeachDetail").mkdirs();
-    new File(pluginProjectRootDir, "WEB-INF/plugins/TestPlugin/properties/languages").mkdirs();
-    new File(pluginProjectRootDir, "WEB-INF/classes/com/jalios/test/plugin").mkdirs();
-
-    try {
-      // 9 files
-      new File(pluginProjectRootDir, "plugins/TestPlugin/css/plugin.css").createNewFile();
-      new File(pluginProjectRootDir, "plugins/TestPlugin/css/test.css").createNewFile();
-      new File(pluginProjectRootDir, "plugins/TestPlugin/docs/changelog.txt").createNewFile();
-      new File(pluginProjectRootDir, "plugins/TestPlugin/js/plugin.js").createNewFile();
-      new File(pluginProjectRootDir, "plugins/TestPlugin/types/PortletQueryForeachDetail/template.jsp").createNewFile();
-      new File(pluginProjectRootDir, "WEB-INF/plugins/TestPlugin/properties/languages/en.prop").createNewFile();
-      new File(pluginProjectRootDir, "WEB-INF/plugins/TestPlugin/properties/languages/fr.prop").createNewFile();
-      new File(pluginProjectRootDir, "WEB-INF/plugins/TestPlugin/properties/plugin.xml").createNewFile();
-      new File(pluginProjectRootDir, "WEB-INF/classes/com/jalios/test/plugin/BasicDataController.java").createNewFile();
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-  }
 }

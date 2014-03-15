@@ -33,7 +33,7 @@ public final class FileSyncStrategy implements SyncStrategy {
     File pluginProjectDirectory = configuration.getPluginProjectRootDir();
 
     for (File pluginFile : getPluginProjectFiles(pluginProjectDirectory)) {
-      File webappFile = getWebappFile(webappProjectDirectory, pluginProjectDirectory, pluginFile);
+      File webappFile = SyncUtil.getDestinationFile(webappProjectDirectory, pluginProjectDirectory, pluginFile);
 
       if (webappFile == null || webappFile.lastModified() < pluginFile.lastModified()) {
         report.addCopyReport(pluginFile, webappFile, SyncStrategyReport.Direction.TO_WEBAPP);
@@ -45,11 +45,6 @@ public final class FileSyncStrategy implements SyncStrategy {
       }
     }
     return report;
-  }
-
-  private File getWebappFile(File webappProjectDirectory, File pluginProjectDirectory, File pluginFile) {
-    String pluginFileRelativePath = SyncUtil.getRelativePath(pluginProjectDirectory, pluginFile);
-    return new File(webappProjectDirectory, pluginFileRelativePath);
   }
 
   private List<File> getPluginProjectFiles(File pluginProjectRootDirectory) {

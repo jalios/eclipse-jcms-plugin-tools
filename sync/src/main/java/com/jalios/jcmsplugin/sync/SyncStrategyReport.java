@@ -41,9 +41,13 @@ public final class SyncStrategyReport {
   public void addCopyReport(File source, File destination, Direction direction) {
     map.get(direction).add(new SyncFile(source, destination));
   }
-
-  public List<SyncFile> getSyncFiles(Direction direction) {
-    return map.get(direction);
+  
+  public List<SyncFile> getSyncFilesToWebapp() {
+    return map.get(Direction.TO_WEBAPP);
+  }
+  
+  public List<SyncFile> getSyncFilesToPlugin() {
+    return map.get(Direction.TO_PLUGIN);
   }
 
   public int countSyncFilesToWebapp() {

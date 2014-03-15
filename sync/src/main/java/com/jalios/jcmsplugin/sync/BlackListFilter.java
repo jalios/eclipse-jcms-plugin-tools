@@ -15,6 +15,17 @@ public class BlackListFilter implements FileFilter {
   public BlackListFilter() {
     excludedDirs.add(".svn");    
   }
+  
+  /*
+  public BlackListFilter(SyncContext context) {
+    excludedDirs.add(".svn");
+    excludedDirs.addAll(JToolsPropertiesUtil.getExcludedElements(context.getConfigFilePath(),
+        JPTConstants.EXCLUDED_DIR_KEY_SC));
+    excludedFiles.addAll(JToolsPropertiesUtil.getExcludedElements(context.getConfigFilePath(),
+        JPTConstants.EXCLUDED_FILES_KEY_SC));
+  }
+  */
+
 
   public boolean accept(File file) {
     // ignore directories

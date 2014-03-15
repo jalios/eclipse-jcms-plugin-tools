@@ -6,7 +6,6 @@ public final class SyncStrategyConfiguration {
   private File ppRootDir;
   private File wpRootDir;
   private String confPath;
-  private boolean preview = false;
   
   private SyncStrategyConfiguration(Builder b) {
     this.ppRootDir = b.ppRootDir;
@@ -22,14 +21,6 @@ public final class SyncStrategyConfiguration {
     return wpRootDir;
   }
   
-  public void enablePreview(){
-    this.preview = true;
-  }
- 
-  public boolean isPreviewEnabled(){
-    return this.preview;
-  }
-
   public static class Builder {
     private File ppRootDir;
     private File wpRootDir;
