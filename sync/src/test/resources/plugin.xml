@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.4//EN" "http://support.jalios.com/dtd/jcms-plugin-1.4.dtd">
+
+<plugin name="TestPlugin" version="0.2" author="Jalios SA" license="Jalios SA" initialize="true" jcms="" order="0" url="" jsync="false" appserver="">
+  
+  <label xml:lang="fr">Module Fiche MAC</label>
+  <description xml:lang="fr">Module Fiche MAC</description>
+  <types>
+    <type name="MAC">
+      <file path="doMACFullDisplay.jsp" />
+    </type>
+    <type name="FocusCR">
+      <file path="doFocusCRFullDisplay.jsp" />
+    </type>
+    <type name="CR" />
+    <type name="MACActions" />
+    <type name="MACImpact" />
+    <type name="MACPhase" />
+    <type name="MACEvolutions" />
+    <type name="CategoryExtension" />
+    
+    <templates type="PortletQueryForeachDetail">
+	  	<template name="doListBoxMAC" file="doListBoxMAC.jsp" usage='box'>
+				<label xml:lang="en">Custom Template for MAC</label>
+				<label xml:lang="fr">Gabarit Liste MAC</label>
+			</template>
+		</templates>
+    
+  </types>
+  
+  <java-classes>
+    <java class="com.jalios.jcmsplugin.mac.MacUtil" />
+  </java-classes>
+  
+  <plugincomponents>
+    <datacontroller class="com.jalios.jcmsplugin.mac.MACDataController" types="MAC" />
+    <policyfilter   class="com.jalios.jcmsplugin.mac.MACRightPolicyFilter" />
+  </plugincomponents>
+  
+  <private-files>
+    <file path="properties/plugin.prop" />
+    <file path="properties/languages/en.prop" />
+    <file path="properties/languages/fr.prop" />
+  </private-files>
+  <public-files>
+    <directory path="jsp" />  
+    <file path="docs/changelog.txt" />
+    <file path="docs/index.html" />
+    <file path="docs/images/preview.jpg" />
+    <file path="docs/images/icon.gif" />
+    <file path="css/MAC.css" />
+    <file path="js/plugin.js" />
+    <file path="types/PortletQueryForeachDetail/doSortAMT.jsp" />
+  </public-files>
+</plugin>
+
