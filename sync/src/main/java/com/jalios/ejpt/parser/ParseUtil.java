@@ -34,7 +34,7 @@ public class ParseUtil {
     }
     return null;
   }
-  
+
   public static void fillElementPath(Collection<String> paths, List<Element> elmList, String prefix, String tagName,
       boolean deep, String matchAttribute, String matchValue) {
     if (isEmpty(elmList)) {
@@ -77,8 +77,7 @@ public class ParseUtil {
       }
     }
   }
-  
-  
+
   private static SAXBuilder getSAXBuilder(EntityResolver entityResolver) {
     SAXBuilder builder = new SAXBuilder(SAXParser.class.getName(), false);
     builder.setExpandEntities(true);
@@ -119,6 +118,17 @@ public class ParseUtil {
       list.add(st.nextToken().trim());
     }
     return list;
+  }
+
+  public static File getPrivatePluginDirectory(File pluginDirectory) {
+    File rootDirectoryPlugins = new File(pluginDirectory, "WEB-INF/plugins");
+    File pluginPrivateDirectory = null;
+
+    // only one
+    if (rootDirectoryPlugins.isDirectory() && (rootDirectoryPlugins.listFiles().length == 1)) {
+      pluginPrivateDirectory = rootDirectoryPlugins.listFiles()[0];
+    }
+    return pluginPrivateDirectory;
   }
 
 }

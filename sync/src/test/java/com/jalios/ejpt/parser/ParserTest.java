@@ -95,15 +95,6 @@ public class ParserTest extends TestUtil{
     ParsePlugin parser = ParsePlugin.getParser();    
     PluginJCMS testPlugin = parser.analyze(webappProjectDirectory.getAbsolutePath(), "TestPlugin");
     assertNotNull(testPlugin);
-    for (String file : testPlugin.getFilesPath()){
-      System.out.println(file);
-    }
-
-    // TODO
-    // assertEquals(testPlugin.getPluginFiles().size(), 10);
-    // assertEquals(testPlugin.getPrivateFiles().size(), 10);
-    // assertEquals(testPlugin.getWebappFiles().size(), 10);
-
   }
 
 }

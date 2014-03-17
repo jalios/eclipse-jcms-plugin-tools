@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public final class SyncStrategyReport {
   enum Direction {
-    TO_WEBAPP, TO_PLUGIN;
+    TO_WEBAPP, TO_PLUGIN, UNKNOWN;
   }
 
   private final Map<Direction, List<SyncFile>> map;
@@ -36,10 +36,16 @@ public final class SyncStrategyReport {
     map = new HashMap<>();
     map.put(Direction.TO_WEBAPP, new ArrayList<SyncFile>());
     map.put(Direction.TO_PLUGIN, new ArrayList<SyncFile>());
+    map.put(Direction.UNKNOWN, new ArrayList<SyncFile>());
+    
   }
 
   public void addCopyReport(File source, File destination, Direction direction) {
     map.get(direction).add(new SyncFile(source, destination));
+  }
+  
+  public void addCopyReport(SyncFile syncFile, Direction direction) {
+    map.get(direction).add(syncFile);
   }
   
   public List<SyncFile> getSyncFilesToWebapp() {
@@ -48,6 +54,10 @@ public final class SyncStrategyReport {
   
   public List<SyncFile> getSyncFilesToPlugin() {
     return map.get(Direction.TO_PLUGIN);
+  }
+  
+  public List<SyncFile> getSyncFilesUnknown() {
+    return map.get(Direction.UNKNOWN);
   }
 
   public int countSyncFilesToWebapp() {

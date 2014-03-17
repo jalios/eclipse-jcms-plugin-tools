@@ -36,7 +36,6 @@
     <file path="css/plugin1.css" />    
     <file path="css/plugin2.less" />
     <file path="js/plugin.js" />
-    <directory path="jsp" />
     <directory path="docs" />          
   </public-files>
 </plugin>

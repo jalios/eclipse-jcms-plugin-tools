@@ -61,6 +61,23 @@ public final class ParsePlugin {
     plugin.setFilesPath(getAllFiles(true, false));
     return plugin;
   }
+  
+  public PluginJCMS analyze(File pluginDirectory) {
+
+    File pluginFile = new File(ParseUtil.getPrivatePluginDirectory(pluginDirectory), "/" + PLUGIN_XML);
+    if (!pluginFile.exists()) {
+      return null;
+    }
+
+    EntityResolver resolver = new InternalEntityResolver();
+    this.domStructure = ParseUtil.getDomStructure(pluginFile, resolver);
+    Element root = this.domStructure.getRootElement();
+    this.name = root.getAttributeValue("name");
+
+    PluginJCMS plugin = new PluginJCMS();
+    plugin.setFilesPath(getAllFiles(true, false));
+    return plugin;
+  }
 
   /**
    * Returns a Set of relative path to all Plugins files

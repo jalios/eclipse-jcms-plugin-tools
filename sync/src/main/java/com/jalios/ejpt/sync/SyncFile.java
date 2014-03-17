@@ -3,27 +3,43 @@ package com.jalios.ejpt.sync;
 import java.io.File;
 
 public class SyncFile {
-  private File src;
-  private File tgt;
+  private File source;
+  private File destination;
+  private Nature nature;
+ 
 
+  enum Nature{
+    ADDED, MODIFIED, MISSED, DELETE
+  }
+  
   public SyncFile(File src, File tgt) {
-    this.src = src;
-    this.tgt = tgt;
+    this.source = src;
+    this.destination = tgt;
+  }
+  
+  public SyncFile(File src, File tgt, Nature nature) {
+    this.source = src;
+    this.destination = tgt;
+    this.nature = nature;
   }
 
   public File getSrc() {
-    return src;
+    return source;
   }
 
   public void setSrc(File src) {
-    this.src = src;
+    this.source = src;
   }
 
   public File getTgt() {
-    return tgt;
+    return destination;
   }
 
   public void setTgt(File tgt) {
-    this.tgt = tgt;
+    this.destination = tgt;
+  }
+  
+  public String getNatureOpName(){
+    return this.nature.name();
   }
 }
