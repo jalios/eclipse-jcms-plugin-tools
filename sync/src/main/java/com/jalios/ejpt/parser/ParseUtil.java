@@ -1,4 +1,4 @@
-package com.jalios.jcmsplugin.parser;
+package com.jalios.ejpt.parser;
 
 import java.io.File;
 import java.io.FileInputStream;

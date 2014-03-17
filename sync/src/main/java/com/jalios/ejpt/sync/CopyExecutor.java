@@ -1,4 +1,4 @@
-package com.jalios.jcmsplugin.sync;
+package com.jalios.ejpt.sync;
 
 import java.io.IOException;
 import java.util.ArrayList;

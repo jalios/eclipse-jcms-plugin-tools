@@ -11,7 +11,7 @@
  the terms and conditions of version 3 of the GNU General Public
  License
  */
-package com.jalios.jcmsplugin.sync;
+package com.jalios.ejpt.sync;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,6 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.jalios.ejpt.sync.CopyExecutor;
+import com.jalios.ejpt.sync.NewWebappFileStrategy;
+import com.jalios.ejpt.sync.SyncStrategy;
+import com.jalios.ejpt.sync.SyncStrategyConfiguration;
+import com.jalios.ejpt.sync.SyncStrategyException;
+import com.jalios.ejpt.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.SyncUtil;
 
 /**
  * Test different sync situation

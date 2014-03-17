@@ -11,7 +11,7 @@
  the terms and conditions of version 3 of the GNU General Public
  License
  */
-package com.jalios.jcmsplugin.sync;
+package com.jalios.ejpt.sync;
 
 /**
  * A strategy don't execute anything

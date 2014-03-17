@@ -1,4 +1,4 @@
-package com.jalios.jcmsplugin.parser;
+package com.jalios.ejpt.parser;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -11,7 +11,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jalios.jcmsplugin.sync.SyncUtil;
+import com.jalios.ejpt.parser.ParsePlugin;
+import com.jalios.ejpt.parser.PluginJCMS;
+import com.jalios.ejpt.sync.SyncUtil;
 
 public class ParserTest {
 

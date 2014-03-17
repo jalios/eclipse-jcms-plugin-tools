@@ -1,4 +1,4 @@
-package com.jalios.jcmsplugin.sync;
+package com.jalios.ejpt.sync;
 
 import java.io.File;
 import java.io.FileFilter;

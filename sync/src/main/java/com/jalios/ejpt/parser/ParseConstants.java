@@ -1,4 +1,4 @@
-package com.jalios.jcmsplugin.parser;
+package com.jalios.ejpt.parser;
 
 public class ParseConstants {
   public static final String PLUGIN_PRIVATE_PATH = "WEB-INF/plugins";

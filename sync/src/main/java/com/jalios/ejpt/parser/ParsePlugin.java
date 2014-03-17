@@ -1,20 +1,20 @@
-package com.jalios.jcmsplugin.parser;
+package com.jalios.ejpt.parser;
 
-import static com.jalios.jcmsplugin.parser.ParseConstants.FILE_INDEX_LISTENER;
-import static com.jalios.jcmsplugin.parser.ParseConstants.LINK_INDEX_LISTENER;
-import static com.jalios.jcmsplugin.parser.ParseConstants.PLUGIN_PRIVATE_PATH;
-import static com.jalios.jcmsplugin.parser.ParseConstants.PLUGIN_PUBLIC_PATH;
-import static com.jalios.jcmsplugin.parser.ParseConstants.PLUGIN_XML;
-import static com.jalios.jcmsplugin.parser.ParseConstants.TEMPLATES_TAG;
-import static com.jalios.jcmsplugin.parser.ParseConstants.TEMPLATE_TAG;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_COMPONENTS;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_OPENAPI;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_OPENAPI_RESOURCE;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_PRIVATE;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_PUBLIC;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_TYPE;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_TYPES;
-import static com.jalios.jcmsplugin.parser.ParseConstants.XML_WEBAPP;
+import static com.jalios.ejpt.parser.ParseConstants.FILE_INDEX_LISTENER;
+import static com.jalios.ejpt.parser.ParseConstants.LINK_INDEX_LISTENER;
+import static com.jalios.ejpt.parser.ParseConstants.PLUGIN_PRIVATE_PATH;
+import static com.jalios.ejpt.parser.ParseConstants.PLUGIN_PUBLIC_PATH;
+import static com.jalios.ejpt.parser.ParseConstants.PLUGIN_XML;
+import static com.jalios.ejpt.parser.ParseConstants.TEMPLATES_TAG;
+import static com.jalios.ejpt.parser.ParseConstants.TEMPLATE_TAG;
+import static com.jalios.ejpt.parser.ParseConstants.XML_COMPONENTS;
+import static com.jalios.ejpt.parser.ParseConstants.XML_OPENAPI;
+import static com.jalios.ejpt.parser.ParseConstants.XML_OPENAPI_RESOURCE;
+import static com.jalios.ejpt.parser.ParseConstants.XML_PRIVATE;
+import static com.jalios.ejpt.parser.ParseConstants.XML_PUBLIC;
+import static com.jalios.ejpt.parser.ParseConstants.XML_TYPE;
+import static com.jalios.ejpt.parser.ParseConstants.XML_TYPES;
+import static com.jalios.ejpt.parser.ParseConstants.XML_WEBAPP;
 
 import java.io.File;
 import java.util.ArrayList;
