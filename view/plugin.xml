@@ -72,14 +72,14 @@
       <key
             commandId="com.jalios.commands.preview"
             contextId="org.eclipse.ui.contexts.window"
-            sequence="CTRL+ALT+Q W"
+            sequence="CTRL+ALT+W"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
       </key>
       <key
             commandId="com.jalios.commands.sync"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="Ctrl+Alt+Q S">
+            sequence="Ctrl+Alt+S">
       </key>
       <key
             commandId="com.jalios.commands.syncall"

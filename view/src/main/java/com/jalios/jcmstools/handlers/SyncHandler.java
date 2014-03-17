@@ -24,22 +24,19 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-import com.jalios.jcmsplugin.sync.CopyExecutor;
-import com.jalios.jcmsplugin.sync.FileSyncStrategy;
-import com.jalios.jcmsplugin.sync.NewWebappFileStrategy;
-import com.jalios.jcmsplugin.sync.SyncFile;
-import com.jalios.jcmsplugin.sync.SyncStrategy;
-import com.jalios.jcmsplugin.sync.SyncStrategyConfiguration;
-import com.jalios.jcmsplugin.sync.SyncStrategyException;
-import com.jalios.jcmsplugin.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.CopyExecutor;
+import com.jalios.ejpt.sync.SyncFile;
+import com.jalios.ejpt.sync.SyncStrategy;
+import com.jalios.ejpt.sync.SyncStrategyConfiguration;
+import com.jalios.ejpt.sync.SyncStrategyException;
+import com.jalios.ejpt.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.XmlSyncStrategy;
 import com.jalios.jcmstools.transversal.JPTUtil;
 
 /**
  * Sync handler for sync and sync preview command
  * 
- * @author xuan-tuong.le (lxtuong@gmail.com - @lxtuong)
- * @see org.eclipse.core.commands.IHandler
- * @see org.eclipse.core.commands.AbstractHandler
+ * @author Xuan Tuong LE (lxtuong@gmail.com - @lxtuong)
  */
 public class SyncHandler extends AbstractHandler {
   public static final String ID = "SyncHandler";
@@ -54,9 +51,7 @@ public class SyncHandler extends AbstractHandler {
    * The constructor.
    */
   public SyncHandler() {
-    MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
-    console.activate();
-    message = console.newMessageStream();
+    
 
   }
 
@@ -74,12 +69,12 @@ public class SyncHandler extends AbstractHandler {
    */
   public Object execute(ExecutionEvent event) throws ExecutionException {
     preview = isPreview(event.getCommand());
-      
+
     initProject(event);
-    
-    if (!isInitOK()){
+
+    if (!isInitOK()) {
       return null;
-    }   
+    }
 
     // init configuration and sync context
     String cfPath = JPTUtil.getSyncConfPath(webappProject);
@@ -94,13 +89,13 @@ public class SyncHandler extends AbstractHandler {
 
     return null;
   }
-  
-  private void initProject(ExecutionEvent event){
+
+  private void initProject(ExecutionEvent event) {
     pluginProject = JPTUtil.getSyncProject(event);
     webappProject = JPTUtil.getJcmsWebappProject(pluginProject);
   }
 
-  private boolean isInitOK(){
+  private boolean isInitOK() {
     if (pluginProject == null) {
       message
           .println("Please define your project as a JCMSPlugin project by using <nature>com.jalios.jpt.natures.jcmspluginnature</nature> in .project");
@@ -114,47 +109,61 @@ public class SyncHandler extends AbstractHandler {
       message.println("Operation aborted.");
       return false;
     }
-    
+
     return true;
   }
-  
-  private void run(SyncStrategyConfiguration configuration){
-    SyncStrategyReport report1 = new SyncStrategyReport();
-    SyncStrategyReport report2 = new SyncStrategyReport();
 
-    SyncStrategy fileSync = new FileSyncStrategy();
-    SyncStrategy newWebappFileStrategy = new NewWebappFileStrategy();
+  private void run(SyncStrategyConfiguration configuration) {
+    SyncStrategyReport report = new SyncStrategyReport();
+
+    SyncStrategy sync = new XmlSyncStrategy();
     try {
-      report1 = fileSync.run(configuration);
-      if (!preview){
-        report1.run(new CopyExecutor());
+      report = sync.run(configuration);
+      if (!preview) {
+        report.run(new CopyExecutor());
       }
-      printReport(report1);
+      printReport(report);
 
-      report2 = newWebappFileStrategy.run(configuration);
-      if (!preview){
-        report2.run(new CopyExecutor());
-      }     
-      printReport(report2);
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
 
   private void printReport(SyncStrategyReport report) {
-    if (preview){
-      message.println("THIS IS ONLY A PREVIEW. NOTHING HAS BEEN EXECUTED");
-    }
+    
+    MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
+    console.activate();
+    message = console.newMessageStream();
     List<SyncFile> syncFilesToPlugin = report.getSyncFilesToPlugin();
-    message.println("W->P : " + syncFilesToPlugin.size() + " files");
-    for (SyncFile sf : syncFilesToPlugin) {
-      message.println("W->P : " + sf.getTgt());
-    }
     List<SyncFile> syncFilesToWebapp = report.getSyncFilesToWebapp();
-    message.println("P->W : " + syncFilesToWebapp.size() + " files");
+    List<SyncFile> syncFilesUnknown = report.getSyncFilesUnknown();
+
+
+    if (preview) {
+      message.println("-----------------------------------------------------------");
+      message.println("This is only a PREVIEW status. I haven't done anything");
+    }
+
+    message.println("************");
+    message.println("Summary : ");
+    message.println("W->P : " + syncFilesToPlugin.size() + " files ");
+    message.println("P->W : " + syncFilesToWebapp.size() + " files ");    
+    message.println("************");
+    if (syncFilesUnknown.size() != 0){
+      message.println("(MISSED) ?->? : " + syncFilesUnknown.size() + " files ");
+      message.println("Oups, theses files don't exist on disk ! Please check 'plugin.xml' declaration in this project and try again.");
+    }
+    message.println("-----------------------------------------------------------");
+
+    for (SyncFile sf : syncFilesToPlugin) {
+      message.println("(" + sf.getNatureOpName() + ") " + "W->P : " + sf.getTgt());
+    }
     for (SyncFile sf : syncFilesToWebapp) {
-      message.println("P->W : " + sf.getTgt());
+      message.println("(" + sf.getNatureOpName() + ") " + "P->W : " + sf.getTgt());
+    }
+    for (SyncFile sf : syncFilesUnknown) {
+      message.println("(" + sf.getNatureOpName() + ") " + "?->? : " + sf.getTgt());
     }
   }
-  
+
 }

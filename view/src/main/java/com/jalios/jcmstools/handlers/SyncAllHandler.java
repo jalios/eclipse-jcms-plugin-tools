@@ -26,13 +26,12 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.jalios.jcmsplugin.sync.CopyExecutor;
-import com.jalios.jcmsplugin.sync.FileSyncStrategy;
-import com.jalios.jcmsplugin.sync.NewWebappFileStrategy;
-import com.jalios.jcmsplugin.sync.SyncStrategy;
-import com.jalios.jcmsplugin.sync.SyncStrategyConfiguration;
-import com.jalios.jcmsplugin.sync.SyncStrategyException;
-import com.jalios.jcmsplugin.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.CopyExecutor;
+import com.jalios.ejpt.sync.SyncStrategy;
+import com.jalios.ejpt.sync.SyncStrategyConfiguration;
+import com.jalios.ejpt.sync.SyncStrategyException;
+import com.jalios.ejpt.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.XmlSyncStrategy;
 import com.jalios.jcmstools.transversal.JPTUtil;
 
 /**
@@ -113,19 +112,13 @@ public class SyncAllHandler extends AbstractHandler {
   }
 
   private void run(SyncStrategyConfiguration configuration, boolean isPreview) {
-    SyncStrategyReport report1 = new SyncStrategyReport();
-    SyncStrategyReport report2 = new SyncStrategyReport();
+    SyncStrategyReport report = new SyncStrategyReport();
 
-    SyncStrategy fileSync = new FileSyncStrategy();
-    SyncStrategy newWebappFileStrategy = new NewWebappFileStrategy();
+    SyncStrategy sync = new XmlSyncStrategy();
     try {
-      report1 = fileSync.run(configuration);
+      report = sync.run(configuration);
       if (!isPreview) {
-        report1.run(new CopyExecutor());
-      }
-      report2 = newWebappFileStrategy.run(configuration);
-      if (!isPreview) {
-        report2.run(new CopyExecutor());
+        report.run(new CopyExecutor());
       }
 
     } catch (SyncStrategyException e) {
