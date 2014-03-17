@@ -34,7 +34,7 @@ public final class ParsePlugin {
 
   private static final ParsePlugin SINGLETON = new ParsePlugin();
   private String name = null;
-  private String webappDirectory = "";
+
   // Internal
   protected Document domStructure = null;
 
@@ -45,8 +45,7 @@ public final class ParsePlugin {
     return SINGLETON;
   }
 
-  public PluginJCMS analyzeWithDefaultResolver(String webappDirectory, String pluginName) {
-    this.webappDirectory = webappDirectory;
+  public PluginJCMS analyze(String webappDirectory, String pluginName) {
 
     File pluginFile = new File(webappDirectory, "WEB-INF/plugins/" + pluginName + "/" + PLUGIN_XML);
     if (!pluginFile.exists()) {
@@ -54,30 +53,6 @@ public final class ParsePlugin {
     }
 
     EntityResolver resolver = new JcmsEntityResolver(new File(webappDirectory, "WEB-INF"));
-    this.domStructure = ParseUtil.getDomStructure(pluginFile, resolver);
-    Element root = this.domStructure.getRootElement();
-    this.name = root.getAttributeValue("name");
-
-    PluginJCMS plugin = new PluginJCMS();
-    plugin.setFilesPath(getAllFiles(true, false));
-    return plugin;
-  }
-
-  /**
-   * Open for test only
-   * @param webappDirectory
-   * @param pluginName
-   * @param resolver
-   * @return
-   */
-  protected PluginJCMS analyze(String webappDirectory, String pluginName, EntityResolver resolver) {
-    this.webappDirectory = webappDirectory;
-
-    File pluginFile = new File(webappDirectory, "WEB-INF/plugins/" + pluginName + "/" + PLUGIN_XML);
-    if (!pluginFile.exists()) {
-      return null;
-    }
-
     this.domStructure = ParseUtil.getDomStructure(pluginFile, resolver);
     Element root = this.domStructure.getRootElement();
     this.name = root.getAttributeValue("name");

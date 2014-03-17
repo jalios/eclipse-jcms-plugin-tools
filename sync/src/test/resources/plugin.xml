@@ -20,21 +20,20 @@
     <type name="CategoryExtension" />
     
     <templates type="PortletQueryForeachDetail">
-	  	<template name="doListBoxMAC" file="doListBoxMAC.jsp" usage='box'>
-				<label xml:lang="en">Custom Template for MAC</label>
-				<label xml:lang="fr">Gabarit Liste MAC</label>
+	  	<template name="custom" file="template.jsp" usage='box'>
+				<label xml:lang="en">Custom Template</label>
+				<label xml:lang="fr">Gabarit Custom</label>
 			</template>
 		</templates>
     
   </types>
   
   <java-classes>
-    <java class="com.jalios.jcmsplugin.mac.MacUtil" />
+    <java class="com.jalios.ejpt.test.MacUtil" />
   </java-classes>
   
   <plugincomponents>
-    <datacontroller class="com.jalios.jcmsplugin.mac.MACDataController" types="MAC" />
-    <policyfilter   class="com.jalios.jcmsplugin.mac.MACRightPolicyFilter" />
+    <datacontroller class="com.jalios.ejpt.test.BasicDataController" types="Article" />
   </plugincomponents>
   
   <private-files>
