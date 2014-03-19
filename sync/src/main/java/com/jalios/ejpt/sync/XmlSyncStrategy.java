@@ -37,9 +37,10 @@ public class XmlSyncStrategy implements SyncStrategy {
     }
 
     for (File declaredPluginFile : declaredPluginFiles) {
-
       if (!declaredPluginFile.exists()) {
         SyncFile syncFile = new SyncFile(declaredPluginFile, declaredPluginFile, SyncFile.Nature.MISSED_DISK);
+        // System.out.println(syncFile.getNatureOpName() + " ?->? : " +
+        // declaredPluginFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.UNKNOWN);
         continue;
       }
@@ -48,18 +49,24 @@ public class XmlSyncStrategy implements SyncStrategy {
 
       if (!webappFile.exists()) {
         SyncFile syncFile = new SyncFile(declaredPluginFile, webappFile, SyncFile.Nature.ADDED);
+        // System.out.println(syncFile.getNatureOpName() + " P->W : " +
+        // declaredPluginFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.TO_WEBAPP);
         continue;
       }
 
       if (webappFile.lastModified() < declaredPluginFile.lastModified()) {
         SyncFile syncFile = new SyncFile(declaredPluginFile, webappFile, SyncFile.Nature.MODIFIED);
+        // System.out.println(syncFile.getNatureOpName() + " P->W : " +
+        // declaredPluginFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.TO_WEBAPP);
         continue;
       }
 
       if (webappFile.lastModified() > declaredPluginFile.lastModified()) {
         SyncFile syncFile = new SyncFile(webappFile, declaredPluginFile, SyncFile.Nature.MODIFIED);
+        // System.out.println(syncFile.getNatureOpName() + " W->P : " +
+        // webappFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.TO_PLUGIN);
       }
 
@@ -93,7 +100,6 @@ public class XmlSyncStrategy implements SyncStrategy {
         files.add(new File(pluginProjectDirectory, declaredFilePath));
       }
     }
-
     return files;
   }
 
