@@ -51,7 +51,6 @@ public class SyncHandler extends AbstractHandler {
    * The constructor.
    */
   public SyncHandler() {
-    
 
   }
 
@@ -114,6 +113,11 @@ public class SyncHandler extends AbstractHandler {
   }
 
   private void run(SyncStrategyConfiguration configuration) {
+    long start = System.currentTimeMillis();
+    MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
+    console.activate();
+    message = console.newMessageStream();
+
     SyncStrategyReport report = new SyncStrategyReport();
 
     SyncStrategy sync = new XmlSyncStrategy();
@@ -127,17 +131,16 @@ public class SyncHandler extends AbstractHandler {
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
+    message.println("-----------------------------------------------------------");
+    message.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
+
   }
 
   private void printReport(SyncStrategyReport report) {
-    
-    MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
-    console.activate();
-    message = console.newMessageStream();
+
     List<SyncFile> syncFilesToPlugin = report.getSyncFilesToPlugin();
     List<SyncFile> syncFilesToWebapp = report.getSyncFilesToWebapp();
     List<SyncFile> syncFilesUnknown = report.getSyncFilesUnknown();
-
 
     if (preview) {
       message.println("-----------------------------------------------------------");
@@ -147,11 +150,13 @@ public class SyncHandler extends AbstractHandler {
     message.println("************");
     message.println("Summary : ");
     message.println("W->P : " + syncFilesToPlugin.size() + " files ");
-    message.println("P->W : " + syncFilesToWebapp.size() + " files ");    
+    message.println("P->W : " + syncFilesToWebapp.size() + " files ");
+    message.println("?->? : " + syncFilesUnknown.size() + " files ");
     message.println("************");
-    if (syncFilesUnknown.size() != 0){
-      message.println("(MISSED) ?->? : " + syncFilesUnknown.size() + " files ");
-      message.println("Oups, theses files don't exist on disk ! Please check 'plugin.xml' declaration in this project and try again.");
+    if (syncFilesUnknown.size() != 0) {
+      message.println("NOTE :");      
+      message.println("(MISSED_DISK) Files declared in plugin.xml but don't exist on disk");
+      message.println("(MISSED_DECLARE) Theses files should (?) be declared in plugin.xml but it's not the case");
     }
     message.println("-----------------------------------------------------------");
 
