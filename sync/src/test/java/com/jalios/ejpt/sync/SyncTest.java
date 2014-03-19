@@ -26,14 +26,6 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.jalios.ejpt.sync.CopyExecutor;
-import com.jalios.ejpt.sync.NewWebappFileStrategy;
-import com.jalios.ejpt.sync.SyncStrategy;
-import com.jalios.ejpt.sync.SyncStrategyConfiguration;
-import com.jalios.ejpt.sync.SyncStrategyException;
-import com.jalios.ejpt.sync.SyncStrategyReport;
-import com.jalios.ejpt.sync.SyncUtil;
-
 /**
  * Test different sync situation
  * 
@@ -183,35 +175,6 @@ public class SyncTest {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-  
-  /**
-   * Only true if the plugin project name is the same as plugin name 
-   */
-  @Test
-  public void syncNewPublicPluginFileFromWebappProject() {
-    SyncStrategy fileSyncStrategy = (SyncStrategy) context.getBean("strategy");
-    SyncStrategy newWebappFileStrategy = new NewWebappFileStrategy();    
-    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
-        webappProjectDirectory).build();
-
-    try {
-      SyncStrategyReport report = fileSyncStrategy.run(configuration);
-      assertEquals(report.countSyncFilesToWebapp(), 9);
-      assertEquals(report.countSyncFilesToPlugin(), 0);
-      report.run(new CopyExecutor());
-
-      new File(webappProjectDirectory, "plugins/TestPlugin/css/newStyle.css").createNewFile();
-      report = newWebappFileStrategy.run(configuration);
-      assertEquals(report.countSyncFilesToPlugin(), 1);      
-      assertEquals(report.countSyncFilesToWebapp(), 0);
-      report.run(new CopyExecutor());          
-      
-    } catch (SyncStrategyException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
+  }  
 
 }
