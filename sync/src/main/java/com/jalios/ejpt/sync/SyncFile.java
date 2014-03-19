@@ -9,7 +9,7 @@ public class SyncFile {
  
 
   enum Nature{
-    ADDED, MODIFIED, MISSED, DELETE
+    ADDED, MODIFIED, MISSED_DISK, MISSED_DECLARE
   }
   
   public SyncFile(File src, File tgt) {

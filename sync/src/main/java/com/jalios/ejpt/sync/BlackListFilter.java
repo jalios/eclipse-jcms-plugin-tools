@@ -13,7 +13,11 @@ public class BlackListFilter implements FileFilter {
   private List<String> excludedExtensions = Arrays.asList(".class");
 
   public BlackListFilter() {
-    excludedDirs.add(".svn");    
+    excludedDirs.add(".svn");
+    excludedDirs.add(".git");
+    excludedDirs.add(".settings");   
+    excludedFiles.add(".project");
+    excludedFiles.add(".externalToolsBuilders");    
   }
   
   /*

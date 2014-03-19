@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jalios.ejpt.parser.ParsePlugin;
+import com.jalios.ejpt.parser.ParseUtil;
 import com.jalios.ejpt.parser.PluginJCMS;
 
 public class XmlSyncStrategy implements SyncStrategy {
@@ -15,38 +16,55 @@ public class XmlSyncStrategy implements SyncStrategy {
     File webappProjectDirectory = configuration.getWebappProjectRootDir();
     File pluginProjectDirectory = configuration.getPluginProjectRootDir();
 
-    for (File declaredPluginFile : getPluginXmlDeclaredFiles(pluginProjectDirectory)) {
-      
-      if (!declaredPluginFile.exists()){
-        SyncFile syncFile = new SyncFile(declaredPluginFile, declaredPluginFile, SyncFile.Nature.MISSED);
-        //System.out.println("(Missed) ? -> ? : " + declaredPluginFile.getAbsolutePath());        
+    List<File> declaredPluginFiles = getPluginXmlDeclaredFiles(pluginProjectDirectory);
+
+    for (File fileCouldBeDeclaredFromPluginProject : getFilesCouldBeDeclared(pluginProjectDirectory,
+        declaredPluginFiles)) {
+      SyncFile syncFile = new SyncFile(fileCouldBeDeclaredFromPluginProject, fileCouldBeDeclaredFromPluginProject,
+          SyncFile.Nature.MISSED_DECLARE);
+      report.addCopyReport(syncFile, SyncStrategyReport.Direction.UNKNOWN);
+    }
+
+    File privatePluginDirectory = ParseUtil.getPrivatePluginDirectory(pluginProjectDirectory);
+    File pluginPublicDirectory = new File(webappProjectDirectory + "/plugins/" + privatePluginDirectory.getName());
+    List<File> filesInPluginPublicDirectory = SyncUtil.deepListFiles(pluginPublicDirectory, new BlackListFilter());
+
+    for (File fileInPPD : filesInPluginPublicDirectory) {
+      if (!containsByName(declaredPluginFiles, fileInPPD)) {
+        SyncFile syncFile = new SyncFile(fileInPPD, fileInPPD, SyncFile.Nature.MISSED_DECLARE);
+        report.addCopyReport(syncFile, SyncStrategyReport.Direction.UNKNOWN);
+      }
+    }
+
+    for (File declaredPluginFile : declaredPluginFiles) {
+
+      if (!declaredPluginFile.exists()) {
+        SyncFile syncFile = new SyncFile(declaredPluginFile, declaredPluginFile, SyncFile.Nature.MISSED_DISK);
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.UNKNOWN);
         continue;
       }
-      
+
       File webappFile = SyncUtil.getDestinationFile(webappProjectDirectory, pluginProjectDirectory, declaredPluginFile);
 
       if (!webappFile.exists()) {
         SyncFile syncFile = new SyncFile(declaredPluginFile, webappFile, SyncFile.Nature.ADDED);
-        // System.out.println("(Added) P -> W : " + pluginFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.TO_WEBAPP);
         continue;
       }
 
       if (webappFile.lastModified() < declaredPluginFile.lastModified()) {
         SyncFile syncFile = new SyncFile(declaredPluginFile, webappFile, SyncFile.Nature.MODIFIED);
-        // System.out.println("(Modified) P -> W : " + pluginFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.TO_WEBAPP);
         continue;
       }
 
       if (webappFile.lastModified() > declaredPluginFile.lastModified()) {
         SyncFile syncFile = new SyncFile(webappFile, declaredPluginFile, SyncFile.Nature.MODIFIED);
-        // System.out.println("(Modified) W -> P : " + webappFile.getPath());
         report.addCopyReport(syncFile, SyncStrategyReport.Direction.TO_PLUGIN);
       }
 
     }
+
     return report;
   }
 
@@ -77,6 +95,28 @@ public class XmlSyncStrategy implements SyncStrategy {
     }
 
     return files;
+  }
+
+  private List<File> getFilesCouldBeDeclared(File directory, List<File> declaredFiles) {
+    List<File> filesCouldBeDeclared = new ArrayList<File>();
+
+    List<File> physicalFiles = SyncUtil.deepListFiles(directory, new BlackListFilter());
+
+    for (File physicalFile : physicalFiles) {
+      if (!declaredFiles.contains(physicalFile)) {
+        filesCouldBeDeclared.add(physicalFile);
+      }
+    }
+    return filesCouldBeDeclared;
+  }
+
+  private boolean containsByName(List<File> files, File anotherFile) {
+    for (File file : files) {
+      if (file.getName().equals(anotherFile.getName())) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
