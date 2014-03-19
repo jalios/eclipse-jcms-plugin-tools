@@ -31,10 +31,9 @@ import com.jalios.ejpt.sync.SyncStrategyConfiguration;
 import com.jalios.ejpt.sync.SyncStrategyException;
 import com.jalios.ejpt.sync.SyncStrategyReport;
 import com.jalios.ejpt.sync.XmlSyncStrategy;
-import com.jalios.jcmstools.transversal.JPTUtil;
+import com.jalios.jcmstools.transversal.EJPTUtil;
 
 /**
- * Sync handler for sync and sync preview command
  * 
  * @author Xuan Tuong LE (lxtuong@gmail.com - @lxtuong)
  */
@@ -44,7 +43,7 @@ public class SyncHandler extends AbstractHandler {
   private static final String CONSOLE_NAME = "Jalios Plugin Tools - Sync Status";
   private IProject pluginProject;
   private IProject webappProject;
-  private MessageConsoleStream message;
+  private MessageConsoleStream consoleStream;
   private boolean preview = false;
 
   /**
@@ -69,16 +68,16 @@ public class SyncHandler extends AbstractHandler {
   public Object execute(ExecutionEvent event) throws ExecutionException {
     preview = isPreview(event.getCommand());
 
-    initProject(event);
+    initProjectsFromEvent(event);
 
-    if (!isInitOK()) {
+    if (!initializeProjectsOK()) {
       return null;
     }
 
     // init configuration and sync context
-    String cfPath = JPTUtil.getSyncConfPath(webappProject);
+    String cfPath = EJPTUtil.getSyncConfigurationFilePath(webappProject);
     File ppPath = pluginProject.getLocation().toFile();
-    File wpPath = new File(JPTUtil.getWebappRootdir(webappProject));
+    File wpPath = new File(EJPTUtil.getWebappDirectoryPath(webappProject));
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(ppPath, wpPath).conf(cfPath)
         .build();
 
@@ -89,23 +88,23 @@ public class SyncHandler extends AbstractHandler {
     return null;
   }
 
-  private void initProject(ExecutionEvent event) {
-    pluginProject = JPTUtil.getSyncProject(event);
-    webappProject = JPTUtil.getJcmsWebappProject(pluginProject);
+  private void initProjectsFromEvent(ExecutionEvent event) {
+    pluginProject = EJPTUtil.getSyncProject(event);
+    webappProject = EJPTUtil.getJcmsWebappProject(pluginProject);
   }
 
-  private boolean isInitOK() {
+  private boolean initializeProjectsOK() {
     if (pluginProject == null) {
-      message
+      consoleStream
           .println("Please define your project as a JCMSPlugin project by using <nature>com.jalios.jpt.natures.jcmspluginnature</nature> in .project");
-      message.println("Operation aborted.");
+      consoleStream.println("Operation aborted.");
       return false;
     }
 
     if (webappProject == null) {
-      message.println("Please link the JCMSPlugin project to a webapp project. Right-click on " + pluginProject
+      consoleStream.println("Please link the JCMSPlugin project to a webapp project. Right-click on " + pluginProject
           + " > Properties > Project References > Choose the webapp project");
-      message.println("Operation aborted.");
+      consoleStream.println("Operation aborted.");
       return false;
     }
 
@@ -114,9 +113,9 @@ public class SyncHandler extends AbstractHandler {
 
   private void run(SyncStrategyConfiguration configuration) {
     long start = System.currentTimeMillis();
-    MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
+    MessageConsole console = EJPTUtil.findConsoleByName(CONSOLE_NAME);
     console.activate();
-    message = console.newMessageStream();
+    consoleStream = console.newMessageStream();
 
     SyncStrategyReport report = new SyncStrategyReport();
 
@@ -131,8 +130,8 @@ public class SyncHandler extends AbstractHandler {
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
-    message.println("-----------------------------------------------------------");
-    message.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
+    consoleStream.println("-----------------------------------------------------------");
+    consoleStream.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
 
   }
 
@@ -143,31 +142,33 @@ public class SyncHandler extends AbstractHandler {
     List<SyncFile> syncFilesUnknown = report.getSyncFilesUnknown();
 
     if (preview) {
-      message.println("-----------------------------------------------------------");
-      message.println("This is only a PREVIEW status. I haven't done anything");
+      consoleStream.println("-----------------------------------------------------------");
+      consoleStream.println("This is only a PREVIEW status. I haven't done anything");
     }
 
-    message.println("************");
-    message.println("Summary : ");
-    message.println("W->P : " + syncFilesToPlugin.size() + " files ");
-    message.println("P->W : " + syncFilesToWebapp.size() + " files ");
-    message.println("?->? : " + syncFilesUnknown.size() + " files ");
-    message.println("************");
+    consoleStream.println("************");
+    consoleStream.println("Summary : ");
+    consoleStream.println("Webapp directory : " + EJPTUtil.getWebappDirectoryPath(webappProject));    
+    consoleStream.println("Plugin directory : " + pluginProject.getLocation().toFile());        
+    consoleStream.println("W->P : " + syncFilesToPlugin.size() + " files ");
+    consoleStream.println("P->W : " + syncFilesToWebapp.size() + " files ");
+    consoleStream.println("?->? : " + syncFilesUnknown.size() + " files ");
+    consoleStream.println("************");
     if (syncFilesUnknown.size() != 0) {
-      message.println("NOTE :");      
-      message.println("(MISSED_DISK) Files declared in plugin.xml but don't exist on disk");
-      message.println("(MISSED_DECLARE) Theses files should (?) be declared in plugin.xml but it's not the case");
+      consoleStream.println("NOTE :");
+      consoleStream.println("(MISSED_DISK) Files declared in plugin.xml but don't exist on disk. Recheck your plugin.xml");
+      consoleStream.println("(MISSED_DECLARE) Theses files should (?) be declared in plugin.xml but it's not the case");
     }
-    message.println("-----------------------------------------------------------");
+    consoleStream.println("-----------------------------------------------------------");
 
     for (SyncFile sf : syncFilesToPlugin) {
-      message.println("(" + sf.getNatureOpName() + ") " + "W->P : " + sf.getTgt());
+      consoleStream.println("(" + sf.getNatureOpName() + ") " + "W->P : " + sf.getTgt());
     }
     for (SyncFile sf : syncFilesToWebapp) {
-      message.println("(" + sf.getNatureOpName() + ") " + "P->W : " + sf.getTgt());
+      consoleStream.println("(" + sf.getNatureOpName() + ") " + "P->W : " + sf.getTgt());
     }
     for (SyncFile sf : syncFilesUnknown) {
-      message.println("(" + sf.getNatureOpName() + ") " + "?->? : " + sf.getTgt());
+      consoleStream.println("(" + sf.getNatureOpName() + ") " + "?->? : " + sf.getTgt());
     }
   }
 

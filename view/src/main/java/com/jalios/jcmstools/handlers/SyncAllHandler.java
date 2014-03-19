@@ -32,7 +32,7 @@ import com.jalios.ejpt.sync.SyncStrategyConfiguration;
 import com.jalios.ejpt.sync.SyncStrategyException;
 import com.jalios.ejpt.sync.SyncStrategyReport;
 import com.jalios.ejpt.sync.XmlSyncStrategy;
-import com.jalios.jcmstools.transversal.JPTUtil;
+import com.jalios.jcmstools.transversal.EJPTUtil;
 
 /**
  * Our sample handler extends AbstractHandler, an IHandler base class.
@@ -75,17 +75,17 @@ public class SyncAllHandler extends AbstractHandler {
         return null;
       }
     }
-    MessageConsole console = JPTUtil.findConsole(CONSOLE_NAME);
+    MessageConsole console = EJPTUtil.findConsoleByName(CONSOLE_NAME);
     console.activate();
     MessageConsoleStream stream = console.newMessageStream();
 
-    for (IProject jcmsPluginProject : JPTUtil.getAllJCMSProject()) {
+    for (IProject jcmsPluginProject : EJPTUtil.getJCMSPluginProjects()) {
       stream.println("\n---------------------------------------------------");
       stream.println("Begin Sync for project '" + jcmsPluginProject + "'");
       stream.println("---------------------------------------------------");
 
       // determine projects to sync
-      IProject jcmsWebappProject = JPTUtil.getJcmsWebappProject(jcmsPluginProject);
+      IProject jcmsWebappProject = EJPTUtil.getJcmsWebappProject(jcmsPluginProject);
 
       if (jcmsWebappProject == null) {
         stream.println("Please link the JCMSPlugin project to a webapp project. Right-click on " + jcmsPluginProject
@@ -95,9 +95,9 @@ public class SyncAllHandler extends AbstractHandler {
       }
 
       // init configuration and sync context
-      String cfPath = JPTUtil.getSyncConfPath(jcmsWebappProject);
+      String cfPath = EJPTUtil.getSyncConfigurationFilePath(jcmsWebappProject);
       File ppPath = jcmsPluginProject.getLocation().toFile();
-      File wpPath = new File(JPTUtil.getWebappRootdir(jcmsWebappProject));
+      File wpPath = new File(EJPTUtil.getWebappDirectoryPath(jcmsWebappProject));
       SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(ppPath, wpPath).conf(cfPath).build();
 
       run(conf, preview);

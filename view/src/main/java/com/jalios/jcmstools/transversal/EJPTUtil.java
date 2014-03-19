@@ -1,4 +1,20 @@
+/*
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License
+ */
 package com.jalios.jcmstools.transversal;
+
+import static com.jalios.jcmstools.transversal.EJPTConstants.JCMS_PLUGIN_NATURE;
+import static com.jalios.jcmstools.transversal.EJPTConstants.JCMS_PROJECT_NATURE;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +32,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -27,58 +44,100 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 /**
- * Action utilities
+ * Utilities
  * 
  * @author Xuan-Tuong LE
  */
-public class JPTUtil implements JPTConstants {
+public class EJPTUtil {
 
-  public static MessageConsole findConsole(String name) {
-    // init
-    MessageConsole myConsole = null;
+  /**
+   * Find a console by name Reuse existing console if found and clear it
+   * Otherwise, create a new one
+   * 
+   * @param consoleName
+   *          console to find
+   * @return MessageConsole console
+   */
+  public static MessageConsole findConsoleByName(String consoleName) {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
-    IConsoleManager conMan = plugin.getConsoleManager();
+    IConsoleManager consoleManager = plugin.getConsoleManager();
 
-    // find if a console exists
-    IConsole[] existing = conMan.getConsoles();
-    for (int i = 0; i < existing.length; i++) {
-      if (name.equals(existing[i].getName())) {
-        myConsole = (MessageConsole) existing[i];
-        myConsole.clearConsole();
-        return myConsole;
+    IConsole[] actualConsoles = consoleManager.getConsoles();
+    for (IConsole itConsole : actualConsoles) {
+      if (consoleName.equals(itConsole.getName())) {
+        MessageConsole consoleResult = (MessageConsole) itConsole;
+        consoleResult.clearConsole();
+        return consoleResult;
       }
     }
 
-    // no console found, create a new one
-    myConsole = new MessageConsole(name, null);
-    conMan.addConsoles(new IConsole[] { myConsole });
-    return myConsole;
+    MessageConsole consoleResult = new MessageConsole(consoleName, null);
+    consoleManager.addConsoles(new IConsole[] { consoleResult });
+    return consoleResult;
   }
 
-  public static String getSyncConfPath(IResource pWebappRsrc) {
-    for (File file : pWebappRsrc.getLocation().toFile().listFiles()) {
-      if (file.getName().equals(JPTConstants.SYNC_CONF_FILENAME)) {
+  public static String getSyncConfigurationFilePath(IResource webappResource) {
+    IPath webappLocation = webappResource.getLocation();
+    if (webappLocation == null) {
+      return "";
+    }
+
+    for (File file : webappLocation.toFile().listFiles()) {
+      if (EJPTConstants.SYNC_CONF_FILENAME.equals(file.getName())) {
         return file.getAbsolutePath();
       }
     }
     return "";
   }
 
-  public static String getWebappRootdir(IResource pWebappRsrc) {
-    // default root dir
-    String result = pWebappRsrc.getLocation().toFile().getPath();
-    for (File file : pWebappRsrc.getLocation().toFile().listFiles()) {
-      if (file.getName().equals(JPTConstants.SYNC_CONF_FILENAME)) {
+  private static boolean isPropertyExist(IPath webappLocation, String propertyKeyName) {
+    if (webappLocation == null || propertyKeyName == null) {
+      return false;
+    }
+
+    Properties prop = new Properties();
+    try {
+      File syncFile = new File(webappLocation.toFile().getPath(), EJPTConstants.SYNC_CONF_FILENAME);
+
+      if (!syncFile.exists()) {
+        return false;
+      }
+
+      FileInputStream in = new FileInputStream(syncFile);
+      prop.load(in);
+      in.close();
+      String propertyValue = prop.getProperty(propertyKeyName);
+      return propertyValue != null && !propertyValue.equals("");
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public static String getWebappDirectoryPath(IResource webappResource) {
+    if (webappResource.getLocation() == null) {
+      return "";
+    }
+
+    IPath webappLocation = webappResource.getLocation();
+    if (!isPropertyExist(webappLocation, EJPTConstants.WEBAPP_ROOT_DIRECTORY_KEY)) {
+      return webappLocation.toFile().getPath();
+    }
+
+    for (File file : webappLocation.toFile().listFiles()) {
+      if (file.getName().equals(EJPTConstants.SYNC_CONF_FILENAME)) {
         Properties prop = new Properties();
         FileInputStream in;
         try {
-          in = new FileInputStream(pWebappRsrc.getLocation().toFile().getPath() + "/"
-              + JPTConstants.SYNC_CONF_FILENAME);
+          in = new FileInputStream(webappResource.getLocation().toFile().getPath() + "/"
+              + EJPTConstants.SYNC_CONF_FILENAME);
           prop.load(in);
           in.close();
-          String rootdir = prop.getProperty(JPTConstants.WEBAPP_ROOT_KEY_SC);
+          String rootdir = prop.getProperty(EJPTConstants.WEBAPP_ROOT_DIRECTORY_KEY);
           if (rootdir != null && !rootdir.equals("")) {
-            result = pWebappRsrc.getLocation().toFile().getPath() + "/" + rootdir;
+            return webappResource.getLocation().toFile().getPath() + "/" + rootdir;
           }
         } catch (FileNotFoundException e) {
           e.printStackTrace();
@@ -88,12 +147,16 @@ public class JPTUtil implements JPTConstants {
         break;
       }
     }
-    return result;
+    return "";
   }
 
   public static boolean isJCMSPluginProject(IProject project) {
+    if (project == null) {
+      return false;
+    }
+
     try {
-      return project != null && project.hasNature(JCMS_PLUGIN_NATURE);
+      return project.hasNature(JCMS_PLUGIN_NATURE);
     } catch (CoreException e) {
       e.printStackTrace();
     }
@@ -101,8 +164,12 @@ public class JPTUtil implements JPTConstants {
   }
 
   public static boolean isJCMSWebappProject(IProject project) {
+    if (project == null) {
+      return false;
+    }
+
     try {
-      return project != null && project.hasNature(JCMS_PROJECT_NATURE);
+      return project.hasNature(JCMS_PROJECT_NATURE);
     } catch (CoreException e) {
       e.printStackTrace();
     }
@@ -117,7 +184,7 @@ public class JPTUtil implements JPTConstants {
     // called
     IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
     if (activeEditor != null) {
-      IFileEditorInput input = (IFileEditorInput)activeEditor.getEditorInput();
+      IFileEditorInput input = (IFileEditorInput) activeEditor.getEditorInput();
       syncProject = input.getFile().getProject();
 
       if (isJCMSPluginProject(syncProject)) {
@@ -180,18 +247,21 @@ public class JPTUtil implements JPTConstants {
     return null;
   }
 
-  public static Set<IProject> getAllJCMSProject() {
-    Set<IProject> results = new HashSet<IProject>();
+  public static Set<IProject> getJCMSPluginProjects() {
     IProject[] availableProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 
-    if (availableProjects != null) {
-      for (IProject project : availableProjects) {
-        if (isJCMSPluginProject(project)) {
-          results.add(project);
-        }
+    if (availableProjects == null) {
+      return new HashSet<IProject>();
+    }
+
+    Set<IProject> jcmsPluginProjects = new HashSet<IProject>();
+    for (IProject project : availableProjects) {
+      if (isJCMSPluginProject(project)) {
+        jcmsPluginProjects.add(project);
       }
     }
-    return results;
+
+    return jcmsPluginProjects;
   }
 
 }
