@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.4//EN" "https://community.jalios.com/dtd/jcms-plugin-1.4.dtd">
+<plugin name="TestPlugin" 
+        version="2.0.4" 
+        author="Jalios SA" 
+        license="Jalios" 
+        initialize="true" 
+        jcms="" 
+        order="0" 
+        url="" 
+        jsync="true" 
+        appserver="">
+        
+  <label xml:lang="en">TestPlugin</label>
+  <label xml:lang="fr">TestPlugin</label>
+  <description xml:lang="fr">TestPlugin</description>
+  
+  <dependencies>
+    <dependency name="BlogPlugin" />
+    <dependency name="CloudPlugin" />
+    <dependency name="CollaborativeSpacePlugin" />
+    <dependency name="DBCommentPlugin" />
+    <dependency name="DBForumPlugin" />
+    <dependency name="DBPollPlugin" />
+    <dependency name="DynamicFormsPlugin" />
+    <dependency name="ESNPlugin" />
+    <dependency name="SocialConversationPlugin" />
+    <dependency name="SyntaxHighlighterPlugin" />
+    <dependency name="ThumbnailGeneratorPlugin" />
+    <dependency name="TimePreviewPlugin" />
+    <dependency name="TopPublicationsPlugin" />
+    <dependency name="VirtualDesktopPlugin" />
+    <dependency name="WikiPlugin" />
+  </dependencies>
+  
+  <types>
+    <type name="Article"/>
+    <type name="ALaUne"/>    
+    <type name="AnalyseConcurrentielle"/> 
+    <type name="Bugs"/> 
+    <type name="DemandeAcces"/> 
+    <type name="DemandeAccesPrivilege"/> 
+    <type name="ElementSlider"/>
+    <type name="FicheCookbook"/> 
+    <type name="JeSuisInteresse"/> 
+    <type name="JeSuisInteresseEtInscrit"/> 
+    <type name="JCMSPlugin"/> 
+    <type name="PageWiki"/> 
+    <type name="RechercheForum"/> 
+    <type name="SoumissionBug"/> 
+    <type name="PortletBloc"/>
+    <type name="PortletLoggedMembers"/>
+    <type name="PortletWYSIWYG"/>
+    <type name="WebPage"/>
+    <type name="ProductBanner"/>
+    <type name="PortletTweeter"/>
+    
+ 	<templates type="AbstractPortletSkinable">  
+      <template usage="box" name="recentWorkSkin" file="doRecentWorkSkin.jsp">
+        <label xml:lang="en">Recent work skin</label>
+        <label xml:lang="fr">Recent work skin</label>
+      </template>
+    </templates>
+        
+    <templates type="Article">  
+      <template usage="full" name="default" file="doArticleFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+    </templates>
+    
+    <templates type="ElementSlider">  
+      <template usage="full" name="default" file="doElementSliderFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="box" name="default" file="doElementSliderFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+    </templates>
+
+    <templates type="Bugs">
+      <template usage="full" name="default" file="doBugsFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="query" name="default" file="doBugsResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>      
+    </templates>
+    
+    <templates type="FicheCookbook">
+      <template usage="full" name="default" file="doFicheCookbookFullDisplay.jsp"> 
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="query" name="default" file="doFicheCookbookResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>  
+    </templates>
+    
+    <templates type="BlogPost">
+      <template usage="query" name="default" file="doBlogPostResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>  
+    </templates>
+    
+    <templates type="SocialIdea">
+      <template usage="query" name="default" file="doSocialIdeaResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>  
+    </templates>
+    
+    <templates type="SocialQuestion">
+      <template usage="query" name="default" file="doSocialQuestionResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>  
+    </templates>
+    
+    <templates type="SocialTopic">
+      <template usage="query" name="default" file="doSocialTopicResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>  
+    </templates>
+     
+    <templates type="FileDocument">
+      <template usage="query" name="default" file="doFileDocumentResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="full" name="default" file="doFileDocumentFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+    </templates>
+
+    <templates type="SmallNews">
+      <template usage="full" name="default" file="doSmallNewsFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="query" name="default" file="doSmallNewsResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>      
+    </templates>
+
+    <templates type="JCMSPlugin">
+      <template usage="full" name="default" file="doJCMSPluginFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="query" name="default" file="doJCMSPluginResultDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>     
+      </template>      
+    </templates>    
+
+    <templates type="PortletLogin">
+      <template usage="box" name="default" file="doPortletLoginFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+    </templates>
+     
+    <templates type="PortletNavigate">
+      <template usage="box" name="JX" file="doDisplayNavigate.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="box" name="JX Ohmy" file="doPortletNavigateDropDownFullDisplayOhmy.jsp">
+        <label xml:lang="en">Test Template Ohmy</label>
+        <label xml:lang="fr">Gabarit Test avec Ohmy</label>
+      </template>
+      <template usage="box" name="JX Ohmy navTrail" file="doPortletNavigateLocationOhmy.jsp">
+        <label xml:lang="en">Test Template Ohmy navTrail</label>
+        <label xml:lang="fr">Gabarit Test Ohmy chemin de fer</label>
+      </template>
+      <template usage="box" name="JX Ohmy navVertical" file="doPortletNavigateVerticalOhmy.jsp">
+        <label xml:lang="en">Test Template Ohmy vertical navigation</label>
+        <label xml:lang="fr">Gabarit Test Ohmy Navigation Vertical</label>
+      </template>
+      <template usage="box" name="JX Ohmy navDropDow" file="doPortletNavigateDropDownFilterOhmy.jsp">
+        <label xml:lang="en">Test Template Ohmy dropdow navigation</label>
+        <label xml:lang="fr">Gabarit Test Ohmy Navigation en dropdown</label>
+      </template>
+      <template usage="box" name="JX Ohmy download" file="doPortletNavigateDownloadOhmy.jsp">
+        <label xml:lang="en">Test Template Ohmy download navigation</label>
+        <label xml:lang="fr">Gabarit Test Ohmy Navigation du menu telechargement </label>
+      </template>
+    </templates>
+
+    <templates type="PortletQueryForeach">
+      <template usage="box" name="bugs" file="doPortletQueryForeachBugs.jsp">
+        <label xml:lang="fr">Test - Liste des bugs</label>
+      </template>
+      <template usage="box" name="JX Ohmy Carrousel" file="doPortletQueryForeachCarouselOhmy.jsp">
+        <label xml:lang="fr">Test - Gabarit de Carrousel Ohmy </label>
+        <label xml:lang="en">Test - Template Ohmy's Carrousel</label>
+      </template>
+      <template usage="box" name="Home page Carrousel" file="doPortletQueryForeachCarouselALaUne.jsp">
+        <label xml:lang="fr">Test - Home page Carrousel</label>
+        <label xml:lang="en">Test - Home page Carrousel</label>
+      </template>
+      <template usage="box" name="CarrrouselALaUneWhiteApproche" file="doCarrrouselALaUneWhiteApproche.jsp">
+        <label xml:lang="fr">Home page Carrousel - White Approche</label>
+        <label xml:lang="en">Home page Carrousel - White Approche</label>
+      </template>
+      
+      <template usage="box" name="JX Ohmy apps" file="doPortletQueryForeachAppsCarouselOhmy.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des modules Ohmy </label>
+        <label xml:lang="en">Test - Template display Apps Ohmy</label>
+      </template>
+      <template usage="box" name="JX Ohmy apps A la Une" file="doPortletQueryForeachAlaUneOhmy.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des modules A la Une</label>
+        <label xml:lang="en">Test - Template display New App Ohmy</label>
+      </template>
+      <template usage="box" name="JX Ohmy boutons pages web" file="doPortletQueryForeachWebPages.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des liens en boutons</label>
+        <label xml:lang="en">Test - Template for displaying links as buttons</label>
+      </template>
+      <template usage="box" name="ProduitBanniere" file="doPortletQueryForeachProductBanner.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage de la bannière dans le portail Produit</label>
+        <label xml:lang="en">Test - Template for displaying banner in product portal</label>
+      </template>
+      <template usage="box" name="ProduitApps" file="doPortletQueryForeachProductApps.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des apps dans le portail Produit</label>
+        <label xml:lang="en">Test - Template for displaying apps in product portal</label>
+      </template>
+      <template usage="box" name="ProduitDocCle" file="doPortletQueryForeachProductDocCle.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des Docs clés dans le portail Produit</label>
+        <label xml:lang="en">Test - Template for displaying key Documents in product portal</label>
+      </template>
+      <template usage="box" name="ProduitLesDocs" file="doPortletQueryForeachResultsDocs.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des 3 derniers Docs du portail Produit</label>
+        <label xml:lang="en">Test - Template for displaying 3 lasts key Documents on Product portal</label>
+      </template>
+      <template usage="box" name="ProduitLesDocsParCat" file="doPortletQueryForeachResultsDocsFilterByCat.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des Docs filtrés par catégorie courante</label>
+        <label xml:lang="en">Test - Template for displaying all key Documents filter by current category</label>
+      </template>
+      <template usage="box" name="ProduitLesTelParCat" file="doPortletQueryForeachResultsDownloadFilterByCat.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des téléchargements filtrés par catégorie</label>
+        <label xml:lang="en">Test - Template for displaying all downloads, filter by category</label>
+      </template>
+      <template usage="box" name="flashInfos" file="doPortletQueryForeachFlashInfos.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage des flash infos</label>
+        <label xml:lang="en">Test - Template for displaying all flash infomation</label>
+      </template>
+      <template usage="box" name="lastInfos" file="doPortletQueryForeachLastFlashInfos.jsp">
+        <label xml:lang="fr">Test - Gabarit d'affichage de la dernière flash infos</label>
+        <label xml:lang="en">Test - Template for displaying the last flash infomation</label>
+      </template>
+      <template usage="box" name="recentWorks" file="doPortletQueryForeachRecentWorks.jsp">
+        <label xml:lang="fr">Test - Recent Works</label>
+        <label xml:lang="en">Test - Recent Works</label>
+      </template>
+      
+    </templates>
+        
+    <templates type="PortletQueryForeachDetail">
+      <template usage="box" name="SpanPresentation Jx" file="doSimpleBoxJX.jsp">
+        <label xml:lang="fr">Test - Gabarit en Span</label>
+      </template>    
+    </templates> 
+
+    <templates type="PortletSearch">
+      <template usage="box" name="Jexperience" file="doPortletLightSearchFullDisplayJex.jsp">
+        <label xml:lang="fr">Test - Recherche simple</label>
+      </template>
+      <template usage="box" name="JexperienceRefineable" file="doPortletLightSearchFullDisplayJexRefineable.jsp">
+        <label xml:lang="fr">Test - Recherche raffinable</label>
+      </template>
+      <template usage="box" name="TripleSupport" file="doPortletJaliosXP.jsp">
+        <label xml:lang="fr">Test - Recherche support</label>
+      </template>
+      <template usage="full" name="bug" file="doPortletSearchBugs.jsp">
+        <label xml:lang="fr">Test - Recherche Bugs</label>
+      </template>
+      <template usage="box" name="forum" file="doPortletLightSearchForum.jsp">
+        <label xml:lang="fr">Test - Recherche Forum</label>
+      </template>
+      <template usage="box" name="JXV2" file="doPortletLightSearchFullDisplay.jsp">
+        <label xml:lang="fr">Test - Recherche Ohmy</label>
+      </template>
+    </templates>
+    
+    <templates type="AbstractPortletSkinable">
+      <template usage="box" name="jaliosXPSkin" file="jaliosXPSkin/doJaliosXPSkin.jsp" dir="type">
+        <label xml:lang="fr">Test Skin</label>
+      </template>
+      <template usage="box" name="shadowSkin" file="shadowSkin/doShadowSkin.jsp" dir="type">
+        <label xml:lang="fr">Shadow Skin</label>
+      </template>
+      <template usage="box" name="squareSkin" file="squareSkin/doSquareSkin.jsp" dir="type">
+        <label xml:lang="fr">Square Skin</label>
+      </template>
+    </templates>
+    
+    <templates type="PortletSelection">
+      <template usage="full" name="dispatch" file="doPortletSelectionDispatch.jsp">
+        <label xml:lang="fr">Test - Dispatch</label>
+      </template>
+    </templates> 
+     
+    <templates type="PortletTweeter">  
+      <template usage="full" name="default" file="doPortletTweeterFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+      <template usage="box" name="default" file="doPortletTweeterFullDisplay.jsp">
+        <label xml:lang="en">Test Template</label>
+        <label xml:lang="fr">Gabarit Test</label>
+      </template>
+    </templates>
+
+    <templates type="PortletBloc">
+      <template usage="full" name="PortletBlocBox" file="doPortletBlocFullDisplay.jsp">
+        <label xml:lang="fr">JX. Portlet bloc affichage full</label>
+      </template>
+      <template usage="box" name="PortletBlocFull" file="doPortletBlocFullDisplay.jsp">
+        <label xml:lang="fr">JX. Portlet bloc affichage box</label>
+      </template>
+    </templates>
+    
+    <templates type="PortletLoggedMembers">  
+      <template usage="box" name="membreConnecte" file="doPortletLoggedMembersOhmyFullDisplay.jsp">
+        <label xml:lang="en">Test Ohmy Members Logget Template</label>
+        <label xml:lang="fr">Gabarit Test Ohmy Membres connectés</label>
+      </template>
+    </templates>
+    
+    <templates type="PortletWYSIWYG">  
+      <template usage="box" name="wisiwygContact" file="doPortletWYSIWYGOhmyContactFullDisplay.jsp">
+        <label xml:lang="en">Test Ohmy WYSIWYG Contact Template</label>
+        <label xml:lang="fr">Gabarit Test Ohmy pour Contact en WYSIWYG</label>
+      </template>
+    </templates>
+    
+    <templates type="WebPage">  
+      <template usage="WebPageOhmy" name="default" file="doWebPageOhmyBoxDisplay.jsp">
+        <label xml:lang="en">Test Ohmy web page button</label>
+        <label xml:lang="fr">Gabarit Test Ohmy bouton pour lien page web</label>
+      </template>
+    </templates>
+    
+    <templates type="ProductBanner">
+      <template usage="full" name="ProductBannerBox" file="doProductBannerFullDisplay.jsp">
+        <label xml:lang="fr">JX. Bannière produit full</label>
+      </template>
+      <template usage="box" name="ProductBannerFull" file="doProductBannerFullDisplay.jsp">
+        <label xml:lang="fr">JX. Bannière produit affichage box</label>
+      </template>
+      <template usage="query" name="default" file="doProductBannerFullDisplay.jsp">
+        <label xml:lang="fr">JX. Bannière produit affichage box</label>
+      </template>
+    </templates>
+    
+  </types>
+ 
+  <!-- ============================== Workflows =========================== -->
+
+  <workflows>
+    <workflow id="workflow_demande" />
+    <workflow id="draftwf" />
+    <workflow id="fichecookbook" /> 
+  </workflows>
+
+  <!-- ========================== Classes and Jars ======================== -->
+  <java-classes>
+    <java class="com.jalios.jcmsplugin.jx.JXConstants" />
+    <java class="com.jalios.jcmsplugin.jx.JXUtils" />
+    <java class="com.jalios.jcmsplugin.jx.JXManager" />
+    <java class="com.jalios.jcmsplugin.jx.TypoComparator" />
+    <java class="com.jalios.jcmsplugin.jx.CustomMemoryAlert" /> 
+    <java class="com.jalios.jcmsplugin.jx.CustomMemoryMonitor"/> 
+  </java-classes>
+ 
+  <!-- ========================== Plugin Components ======================= -->                                                          
+  <plugincomponents>
+    <storelistener         class="com.jalios.jcmsplugin.jx.DemandeAccesListener"  types="generated.DemandeAcces" beforeStoreLoad="false" repeat="false" />
+    <channellistener       class="com.jalios.jcmsplugin.jx.PluginJCMSChannelListener" />
+    <queryfilter           class="com.jalios.jcmsplugin.jx.JXQueryFilter" />
+    <policyfilter          class="com.jalios.jcmsplugin.jx.JXPortalPolicyFilter" />
+  </plugincomponents>
+
+  <!-- ===================== Private/Public/Webapp files ================== -->
+
+  <private-files>
+    <file path="properties/plugin.prop" />
+    <file path="properties/languages/en.prop" />
+    <file path="properties/languages/fr.prop" />
+    <file path="defaultVirtualDesktop.xml" />
+  </private-files>
+  
+  <public-files>
+    <directory path="docs" />
+    <directory path="js" />
+    <directory path="images" />
+    <directory path="templates" />
+    <directory path="types" />
+    <directory path="css" />
+
+    <file path="types/PortletQueryForeach/doPagerOhmy.jsp" />
+    <file path="types/PortletJspCollection/doDisplayWelcomeOhmy.jsp" />
+    <file path="types/PortletJspCollection/doDisplayBoxesOhmy.jsp" />
+    <file path="types/PortletJspCollection/doDisplayVirtualPortal.jsp" />
+    <file path="types/PortletJspCollection/doDisplayFooterOhmy.jsp" />
+    <file path="types/PortletJspCollection/PortailApps/doDisplayAppsPortal.jsp" />
+    <file path="types/PortletJspCollection/PortailDocumentation/doDisplayDocumentationPortal.jsp" />
+    <file path="types/PortletJspCollection/PortailProduit/doDisplayProductPortal.jsp" />
+    <file path="types/PortletJspCollection/PortailFlashInfos/doDisplayFlashInfosPortal.jsp" />
+
+    <file path="types/PortletSearch/doJaliosXPSearchHiddenParams.jsp"/>
+
+    <file path="types/JCMSPlugin/doDisplayRelated.jsp"/>
+
+    <file path="jsp/pluginList.jsp" />
+    <file path="jsp/jxHeaderOhmy.jsp" />
+    <file path="jsp/jxDoToTopOhmy.jsp" />
+    <file path="jsp/testOhmy.jsp" />
+    <file path="jsp/pluginAnonymousInterested.jsp" />
+    <file path="jsp/pluginMemberInterested.jsp" />
+    <file path="jsp/ttCardPlugin.jsp" />
+    
+    <!-- EditForm -->
+    <!-- file path="types/DemandeAccesPrivilege/editFormDemandeAccesPrivilege.jsp"/ -->
+
+    <file path="types/DemandeAcces/editFormDemandeAcces.jsp"/>
+    <file path="types/DemandeAcces/doEditDemandeAcces.jsp"/>
+    
+    <file path="types/JeSuisInteresse/editFormJeSuisInteresse.jsp"/>
+    <file path="types/JeSuisInteresse/doEditJeSuisInteresse.jsp"/>
+    
+    <file path="types/JeSuisInteresseEtInscrit/doEditJeSuisInteresseEtInscrit.jsp"/>
+    <file path="types/JeSuisInteresseEtInscrit/editFormJeSuisInteresseEtInscrit.jsp"/>
+    
+    <!-- TARGET -->
+    <file path="jsp/topbar/doSiteTopbarMenuLeft.jsp" include="SITE_TOPBAR_MENU_RIGHT" />
+    <file path="jsp/topbar/doSiteTopbarSubscribe.jsp" include="SITE_TOPBAR_ICONS_LEFT" />
+  </public-files>
+  
+  <webapp-files>
+    <!-- DEV SPECIFIQUES -->
+    <file path="admin/doMemberFullDisplay.jsp" />
+    <file path="custom/jcms/doResultDisplay.jsp" />
+    <file path="custom/activateAccount.jsp" />
+    <file path="custom/doAfficheRubrique.jsp" />
+    <file path="custom/doJXFooter.jsp" />
+    <file path="custom/doJXHeader.jsp" />
+    <file path="custom/doRubriqueDescription.jsp" /> 
+    <file path="custom/doTitreRubrique.jsp" /> 
+    <file path="custom/downloadForm.jsp" /> 
+    <file path="custom/exportJCMS6.jsp" /> 
+    <file path="custom/jxFooter.jsp" /> 
+    <file path="custom/jxHeader.jsp" /> 
+    <file path="custom/mostRead.jsp" /> 
+    <file path="custom/test.jsp" /> 
+    <file path="custom/uploadBox.jsp" />
+    <file path="custom/versions.jsp" />
+
+    <!-- IMAGES -->
+    <file path="images/custom/centerColumnBack.gif"/> 
+    <file path="images/custom/discussion.gif"/> 
+    <file path="images/custom/download_16.png"/> 
+    <file path="images/custom/download_32.png"/> 
+    <file path="images/custom/email.gif"/> 
+    <file path="images/custom/fax.gif"/> 
+    <file path="images/custom/head3d.gif"/> 
+    <file path="images/custom/headBack.gif"/> 
+    <file path="images/custom/headLogo.jpg"/> 
+    <file path="images/custom/headShadow.gif"/> 
+    <file path="images/custom/headXBottom.gif"/> 
+    <file path="images/custom/helloBack.gif"/> 
+    <file path="images/custom/helloBack.jpg"/> 
+    <file path="images/custom/leaf.gif"/> 
+    <file path="images/custom/leftColumnBack.gif"/> 
+    <file path="images/custom/leftColumnBack.jpg"/> 
+    <file path="images/custom/logoJXP.gif"/> 
+    <file path="images/custom/open.gif"/> 
+    <file path="images/custom/openeable.gif"/> 
+    <file path="images/custom/ss_shadow.gif"/> 
+    <file path="images/custom/tel.gif"/> 
+    <file path="images/custom/tocExpandDown.gif"/> 
+    <file path="images/custom/tocExpandUp.gif"/> 
+    <file path="images/custom/visuelDocumentation.jpg"/> 
+    <file path="images/custom/visuelGuide.jpg"/> 
+    <file path="images/custom/visuelHomeXP.jpg"/> 
+    <file path="images/custom/visuelSupport.jpg"/> 
+    <file path="images/custom/jaliosXP/fondBandeau.gif"/> 
+    <file path="images/custom/jaliosXP/logo.jpg"/>
+    <file path="images/custom/jaliosXP/logo3D.gif"/> 
+    <file path="images/custom/jaliosXP/visuelJaliosXP.jpg"/> 
+    <file path="images/custom/memory/memory.jpg"/> 
+    
+    <!-- SKIN -->
+    <file path="images/custom/jaliosSimpleSkin/bluredBigBullet.gif"/> 
+    <file path="images/custom/jaliosSimpleSkin/footerRowBack.gif"/>
+    <file path="images/custom/jaliosSimpleSkin/headTableBack.gif"/> 
+    <file path="images/custom/jaliosSimpleSkin/mainBack_dark.gif"/> 
+    <file path="images/custom/jaliosSimpleSkin/mainBack_light.gif"/> 
+    <file path="images/custom/jaliosSimpleSkin/mainBullet.gif"/> 
+    <file path="images/custom/jaliosSimpleSkin/menuRowBack.gif"/>
+    <file path="types/AbstractPortletSkinable/JaliosSimpleSkin/default.css" />    
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/default.css"/>    
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/logo3D.css"/>  
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/simple.css"/>  
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/images/jaliosXPGradientCorner.gif"/>  
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/images/jaliosXPlogo3DCorner.gif"/>  
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/images/jaliosXPSkinBack.gif"/>  
+    <file path="types/AbstractPortletSkinable/jaliosXPSkin/images/jaliosXPSkinTopLeftCorner.gif"/>  
+    <file path="types/AbstractPortletSkinable/shadowSkin/default.css"/>
+    <file path="types/AbstractPortletSkinable/shadowSkin/doShadowSkin.jpg"/> 
+    <file path="types/AbstractPortletSkinable/shadowSkin/images/shadowSkinBack.gif"/>  
+    <file path="types/AbstractPortletSkinable/shadowSkin/images/shadowSkinLeft.gif"/>  
+    <file path="types/AbstractPortletSkinable/shadowSkin/images/shadowSkinRight.gif"/>  
+    <file path="types/AbstractPortletSkinable/shadowSkin/images/shadowSkinTabLeft.gif"/>  
+    <file path="types/AbstractPortletSkinable/shadowSkin/images/shadowSkinTabRight.gif"/>
+    <file path="types/AbstractPortletSkinable/squareSkin/default.css"/>
+    <file path="types/AbstractPortletSkinable/squareSkin/doSquareSkin.jpg"/> 
+    <file path="types/AbstractPortletSkinable/squareSkin/images/shadowSkinBack.gif"/> 
+    <file path="types/AbstractPortletSkinable/squareSkin/images/shadowSkinLeft.gif"/> 
+    <file path="types/AbstractPortletSkinable/squareSkin/images/shadowSkinRight.gif"/> 
+    <file path="types/AbstractPortletSkinable/squareSkin/images/shadowSkinTabLeft.gif"/> 
+    <file path="types/AbstractPortletSkinable/squareSkin/images/shadowSkinTabRight.gif"/> 
+    
+    <!-- CSS --> 
+    <file path="css/custom_fo.css" />
+    <file path="css/jaliosSimpleSkin.css" /> 
+    <file path="css/wysiwyg.css" />
+    <file path="css/fulldisplay.css" />
+    <file path="css/verticalMenu/verticalMenuCommon.css" /> 
+  </webapp-files>
+</plugin>
