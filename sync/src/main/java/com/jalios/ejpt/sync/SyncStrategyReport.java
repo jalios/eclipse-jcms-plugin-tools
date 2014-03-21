@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
+
 /**
  * Sync compute result
  * 
@@ -30,33 +32,33 @@ public final class SyncStrategyReport {
     TO_WEBAPP, TO_PLUGIN, UNKNOWN;
   }
 
-  private final Map<Direction, List<SyncFile>> map;
+  private final Map<Direction, List<FileSyncStatus>> map;
 
   public SyncStrategyReport() {
     map = new HashMap<>();
-    map.put(Direction.TO_WEBAPP, new ArrayList<SyncFile>());
-    map.put(Direction.TO_PLUGIN, new ArrayList<SyncFile>());
-    map.put(Direction.UNKNOWN, new ArrayList<SyncFile>());
+    map.put(Direction.TO_WEBAPP, new ArrayList<FileSyncStatus>());
+    map.put(Direction.TO_PLUGIN, new ArrayList<FileSyncStatus>());
+    map.put(Direction.UNKNOWN, new ArrayList<FileSyncStatus>());
     
   }
 
   public void addCopyReport(File source, File destination, Direction direction) {
-    map.get(direction).add(new SyncFile(source, destination));
+    map.get(direction).add(new FileSyncStatus(source, destination));
   }
   
-  public void addCopyReport(SyncFile syncFile, Direction direction) {
+  public void addReport(FileSyncStatus syncFile, Direction direction) {
     map.get(direction).add(syncFile);
   }
   
-  public List<SyncFile> getSyncFilesToWebapp() {
+  public List<FileSyncStatus> getSyncFilesToWebapp() {
     return map.get(Direction.TO_WEBAPP);
   }
   
-  public List<SyncFile> getSyncFilesToPlugin() {
+  public List<FileSyncStatus> getSyncFilesToPlugin() {
     return map.get(Direction.TO_PLUGIN);
   }
   
-  public List<SyncFile> getSyncFilesUnknown() {
+  public List<FileSyncStatus> getSyncFilesUnknown() {
     return map.get(Direction.UNKNOWN);
   }
 
@@ -71,16 +73,27 @@ public final class SyncStrategyReport {
   public void run(SyncExecutor executor) {
     executor.run(this);
   }
+  
+  public void mergeReport(SyncStrategyReport report) {
+    map.get(Direction.TO_PLUGIN).addAll(report.getSyncFilesToPlugin());
+    map.get(Direction.TO_WEBAPP).addAll(report.getSyncFilesToWebapp());
+    map.get(Direction.UNKNOWN).addAll(report.getSyncFilesUnknown());
+  }
 
   @Override
   public String toString() {
     StringBuilder str = new StringBuilder();
-    for (SyncFile sf : map.get(Direction.TO_WEBAPP)) {
-      str.append("P->W : " + sf.getTgt().getAbsolutePath()).append("\n");
+    for (FileSyncStatus sf : map.get(Direction.TO_WEBAPP)) {
+      str.append("P->W : " + sf.getDestination().getAbsolutePath()).append("\n");
     }
 
-    for (SyncFile sf : map.get(Direction.TO_PLUGIN)) {
-      str.append("W->P : " + sf.getTgt().getAbsolutePath()).append("\n");
+    for (FileSyncStatus sf : map.get(Direction.TO_PLUGIN)) {
+      str.append("W->P : " + sf.getDestination().getAbsolutePath()).append("\n");
+    }
+    
+
+    for (FileSyncStatus sf : map.get(Direction.UNKNOWN)) {
+      str.append("?->? : " + sf.getDestination().getAbsolutePath()).append("\n");
     }
     return str.toString();
   }

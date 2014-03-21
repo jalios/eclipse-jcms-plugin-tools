@@ -80,10 +80,10 @@ public class ParserTest extends TestUtil{
       new File(webappProjectDirectory, "edit.jsp").createNewFile();
       new File(webappProjectDirectory, "index.jsp").createNewFile();
       
-      FileUtils.copyFile(getFileFromResource("plugin.xml"), new File(webappProjectDirectory,
+      FileUtils.copyFile(getFileFromResource("plugin-jx.xml"), new File(webappProjectDirectory,
           "WEB-INF/plugins/TestPlugin/plugin.xml"));      
-      FileUtils.copyFile(getFileFromResource("jcms-plugin-1.4.dtd"), new File(webappProjectDirectory,
-          "WEB-INF/jalios/jcms-plugin-1.4.dtd"));            
+      FileUtils.copyFile(getFileFromResource("jcms-plugin-1.6.dtd"), new File(webappProjectDirectory,
+          "WEB-INF/jalios/jcms-plugin-1.6.dtd"));            
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -95,6 +95,11 @@ public class ParserTest extends TestUtil{
     ParsePlugin parser = ParsePlugin.getParser();    
     PluginJCMS testPlugin = parser.analyze(webappProjectDirectory.getAbsolutePath(), "TestPlugin");
     assertNotNull(testPlugin);
+    /*
+    for (String filePath : testPlugin.getFilesPath()){
+      System.out.println(filePath);
+    }
+    */
   }
 
 }

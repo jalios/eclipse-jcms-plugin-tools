@@ -25,12 +25,12 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.jalios.ejpt.sync.CopyExecutor;
-import com.jalios.ejpt.sync.SyncFile;
 import com.jalios.ejpt.sync.SyncStrategy;
 import com.jalios.ejpt.sync.SyncStrategyConfiguration;
 import com.jalios.ejpt.sync.SyncStrategyException;
 import com.jalios.ejpt.sync.SyncStrategyReport;
 import com.jalios.ejpt.sync.XmlSyncStrategy;
+import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 import com.jalios.jcmstools.transversal.EJPTUtil;
 
 /**
@@ -137,9 +137,9 @@ public class SyncHandler extends AbstractHandler {
 
   private void printReport(SyncStrategyReport report) {
 
-    List<SyncFile> syncFilesToPlugin = report.getSyncFilesToPlugin();
-    List<SyncFile> syncFilesToWebapp = report.getSyncFilesToWebapp();
-    List<SyncFile> syncFilesUnknown = report.getSyncFilesUnknown();
+    List<FileSyncStatus> syncFilesToPlugin = report.getSyncFilesToPlugin();
+    List<FileSyncStatus> syncFilesToWebapp = report.getSyncFilesToWebapp();
+    List<FileSyncStatus> syncFilesUnknown = report.getSyncFilesUnknown();
 
     if (preview) {
       consoleStream.println("-----------------------------------------------------------");
@@ -161,13 +161,13 @@ public class SyncHandler extends AbstractHandler {
     }
     consoleStream.println("-----------------------------------------------------------");
 
-    for (SyncFile sf : syncFilesToPlugin) {
+    for (FileSyncStatus sf : syncFilesToPlugin) {
       consoleStream.println("(" + sf.getNatureOpName() + ") " + "W->P : " + sf.getTgt());
     }
-    for (SyncFile sf : syncFilesToWebapp) {
+    for (FileSyncStatus sf : syncFilesToWebapp) {
       consoleStream.println("(" + sf.getNatureOpName() + ") " + "P->W : " + sf.getTgt());
     }
-    for (SyncFile sf : syncFilesUnknown) {
+    for (FileSyncStatus sf : syncFilesUnknown) {
       consoleStream.println("(" + sf.getNatureOpName() + ") " + "?->? : " + sf.getTgt());
     }
   }

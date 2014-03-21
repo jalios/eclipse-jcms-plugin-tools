@@ -25,7 +25,6 @@ public class XmlSyncTest extends TestUtil {
     webappProjectDirectory = new File(tmpWebappProjectTestDirectory, "webappproject");
     webappProjectDirectory.mkdirs();
     createLightJcmsProjectStructure();
-
     tmpPluginProjectTestDirectory = SyncUtil.createTempDir();
     pluginProjectDirectory = new File(tmpPluginProjectTestDirectory, "TestPluginRoot");
     pluginProjectDirectory.mkdirs();
@@ -34,6 +33,7 @@ public class XmlSyncTest extends TestUtil {
 
   @After
   public void tearDown() {
+    
     try {
       FileUtils.deleteDirectory(tmpWebappProjectTestDirectory);
       FileUtils.deleteDirectory(tmpPluginProjectTestDirectory);
@@ -136,7 +136,7 @@ public class XmlSyncTest extends TestUtil {
   }
   
   @Test
-  public void syncNoJsp() {
+  public void syncExcludeJsp() {
     
     try {
       FileUtils.copyFile(getFileFromResource("plugin-nojsp.xml"), new File(pluginProjectDirectory,
@@ -153,6 +153,62 @@ public class XmlSyncTest extends TestUtil {
       report.run(new CopyExecutor());
       assertEquals(report.countSyncFilesToWebapp(), 14);
       assertEquals(report.countSyncFilesToPlugin(), 0);      
+      
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  @Test
+  public void syncWithoutConfiguration() {
+
+    try {     
+      new File(pluginProjectDirectory, ".settings").mkdirs();      
+      // 2 new files in configuration
+      new File(pluginProjectDirectory, ".jcmsNaturePlugin").createNewFile();      
+      new File(pluginProjectDirectory, ".settings/foobar.xml").createNewFile();
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+    
+    
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);      
+      assertEquals(report.getSyncFilesUnknown().size(), 2);            
+      
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  @Test
+  public void syncWithExcludeOptions() {
+
+    try {
+      FileUtils.copyFile(getFileFromResource("sync.conf"), new File(tmpWebappProjectTestDirectory,
+          "sync.conf"));
+      new File(pluginProjectDirectory, ".settings").mkdirs();   
+      new File(pluginProjectDirectory, ".foo").mkdirs();      
+
+      // 3 files to exclude from sync
+      new File(pluginProjectDirectory, ".jcmsNaturePlugin").createNewFile();      
+      new File(pluginProjectDirectory, ".anotherFile").createNewFile();
+      new File(pluginProjectDirectory, ".settings/foobar.xml").createNewFile();
+      new File(pluginProjectDirectory, ".foo/foobar.xml").createNewFile();
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+    
+    
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).configuration(getFileFromResource("sync.conf")).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);      
+      assertEquals(report.getSyncFilesUnknown().size(), 0);            
       
     } catch (SyncStrategyException e) {
       e.printStackTrace();

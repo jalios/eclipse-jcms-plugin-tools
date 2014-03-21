@@ -17,6 +17,8 @@ public class ParseConstants {
   public static final String XML_OPENAPI_RESOURCE = "resource";
   public static final String LINK_INDEX_LISTENER = "LinkIndexListener";
   public static final String FILE_INDEX_LISTENER = "FileIndexListener";
-  public static final String TEMPLATES_TAG       = "templates";
-  public static final String TEMPLATE_TAG        = "template";
+  public static final String TEMPLATES_TAG = "templates";
+  public static final String TEMPLATE_TAG = "template";
+  public static final String PLUGIN_EXTENSION = ".zip";
+
 }

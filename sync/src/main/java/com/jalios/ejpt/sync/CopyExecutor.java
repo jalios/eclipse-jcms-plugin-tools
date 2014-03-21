@@ -4,16 +4,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
+
 public class CopyExecutor implements SyncExecutor {
 
   @Override
   public void run(SyncStrategyReport report) {
-    List<SyncFile> syncFiles = new ArrayList<SyncFile>();
+    List<FileSyncStatus> syncFiles = new ArrayList<FileSyncStatus>();
     syncFiles.addAll(report.getSyncFilesToPlugin());
     syncFiles.addAll(report.getSyncFilesToWebapp());
-    for (SyncFile syncFile : syncFiles) {
+    for (FileSyncStatus syncFile : syncFiles) {
       try {
-        SyncUtil.copyFile(syncFile.getSrc(), syncFile.getTgt());
+        SyncUtil.copyFile(syncFile.getSource(), syncFile.getDestination());
       } catch (IOException e) {
         e.printStackTrace();
       }

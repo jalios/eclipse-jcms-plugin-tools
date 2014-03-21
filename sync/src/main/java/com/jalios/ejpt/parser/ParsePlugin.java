@@ -17,6 +17,7 @@ import static com.jalios.ejpt.parser.ParseConstants.XML_TYPES;
 import static com.jalios.ejpt.parser.ParseConstants.XML_WEBAPP;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,11 +31,13 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.xml.sax.EntityResolver;
 
+import com.jalios.ejpt.sync.utils.Util;
+
 public final class ParsePlugin {
 
   private static final ParsePlugin SINGLETON = new ParsePlugin();
   private String name = null;
-
+  private String webappDirectory;
   // Internal
   protected Document domStructure = null;
 
@@ -46,7 +49,7 @@ public final class ParsePlugin {
   }
 
   public PluginJCMS analyze(String webappDirectory, String pluginName) {
-
+    this.webappDirectory = webappDirectory;
     File pluginFile = new File(webappDirectory, "WEB-INF/plugins/" + pluginName + "/" + PLUGIN_XML);
     if (!pluginFile.exists()) {
       return null;
@@ -61,7 +64,7 @@ public final class ParsePlugin {
     plugin.setFilesPath(getAllFiles(true, false));
     return plugin;
   }
-  
+
   public PluginJCMS analyze(File pluginDirectory) {
 
     File pluginFile = new File(ParseUtil.getPrivatePluginDirectory(pluginDirectory), "/" + PLUGIN_XML);
@@ -325,7 +328,7 @@ public final class ParsePlugin {
     @SuppressWarnings("unchecked")
     // JDOM generics
     List<Element> typeList = typesElm.getChildren(XML_TYPE);
-    if (ParseUtil.isEmpty(typeList)) {
+    if (Util.isEmpty(typeList)) {
       return typeMap;
     }
 
@@ -356,7 +359,7 @@ public final class ParsePlugin {
       @SuppressWarnings("unchecked")
       // JDOM generics
       List<Element> javaList = itType.getChildren("java");
-      if (!ParseUtil.isEmpty(javaList)) {
+      if (Util.notEmpty(javaList)) {
         for (Element itJava : javaList) {
           fillJavaSet(itJava, pathSet, sources);
         }
@@ -407,7 +410,7 @@ public final class ParsePlugin {
       }
       String folderPath = "types/" + te + "/";
       Set<String> tteSet = getTypeTemplateEntriesFromElement(itElm, folderPath);
-      if (ParseUtil.isEmpty(tteSet)) {
+      if (Util.isEmpty(tteSet)) {
       }
       tteList.addAll(tteSet);
     }
@@ -427,7 +430,7 @@ public final class ParsePlugin {
     @SuppressWarnings("unchecked")
     // JDOM generics
     List<Element> elmList = itElm.getChildren(TEMPLATE_TAG);
-    if (ParseUtil.isEmpty(elmList)) {
+    if (Util.isEmpty(elmList)) {
       return tteSet;
     }
 
@@ -534,7 +537,7 @@ public final class ParsePlugin {
     @SuppressWarnings("unchecked")
     // JDOM generics
     List<Element> itemList = plugincpnt.getChildren(tagName);
-    if (ParseUtil.isEmpty(itemList)) {
+    if (Util.isEmpty(itemList)) {
       return;
     }
 
@@ -605,7 +608,7 @@ public final class ParsePlugin {
     @SuppressWarnings("unchecked")
     // JDOM generics
     List<Element> restResourceList = openapicpnt.getChildren(XML_OPENAPI_RESOURCE);
-    if (ParseUtil.isEmpty(restResourceList)) {
+    if (Util.isEmpty(restResourceList)) {
       return pathMap;
     }
 
@@ -632,12 +635,63 @@ public final class ParsePlugin {
     }
 
     pathSet.addAll(getClassFiles(itClass));
+
+    String itPackage = itJava.getAttributeValue("package");
+    // Check attribute package
+    if (itPackage != null) {
+      // String excludesPattern = itJava.getAttributeValue("excludes");
+      pathSet.addAll(getPackageClassFiles(webappDirectory, itPackage, sources));
+      return;
+    }
   }
 
   public Set<String> getClassFiles(String fullname) {
     String fullpath = fullname.replace('.', '/');
     Set<String> pathSet = new HashSet<String>();
     pathSet.add("WEB-INF/classes/" + fullpath + ".java");
+    return pathSet;
+  }
+
+  private Set<String> getPackageClassFiles(String realPath, String fullPackage, boolean sources) {
+    String packagePath = fullPackage.replace('.', '/');
+    File packageFolder = new File(realPath + "/WEB-INF/classes/" + packagePath);
+
+    Set<String> pathSet = new HashSet<String>(5);
+
+    // Check folder exists
+    if (!packageFolder.exists()) {
+      return pathSet;
+    }
+
+    File[] files = packageFolder.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File file) {
+        return file.isDirectory() || file.getName().endsWith(".class");
+      }
+    });
+
+    if (files == null || files.length == 0) {
+      return pathSet;
+    }
+
+    for (File file : files) {
+      String name = file.getName();
+      if (file.isDirectory()) {
+        pathSet.addAll(getPackageClassFiles(realPath, packagePath + "/" + name, sources));
+      } else {
+        // Add .class File
+        pathSet.add("WEB-INF/classes/" + packagePath + "/" + name);
+
+        // Add .java
+        if (sources) {
+          String shortname = name.substring(0, name.lastIndexOf('.'));
+          if (shortname.indexOf("$") == -1) { // Skip inner class
+            pathSet.add("WEB-INF/classes/" + packagePath + "/" + shortname + ".java");
+          }
+        }
+      }
+    }
+
     return pathSet;
   }
 

@@ -3,53 +3,61 @@ package com.jalios.ejpt.sync;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class BlackListFilter implements FileFilter {
-  private Set<String> excludedDirs = new TreeSet<String>();
-  private Set<String> excludedFiles = new TreeSet<String>();
+  private List<String> excludedDirs = new LinkedList<String>();
+  private List<String> excludedFiles = new LinkedList<String>();
   private List<String> excludedExtensions = Arrays.asList(".class");
 
-  public BlackListFilter() {
+  private BlackListFilter(Builder builder) {
+    // default
     excludedDirs.add(".svn");
     excludedDirs.add(".git");
-    excludedDirs.add(".settings");   
     excludedFiles.add(".project");
-    excludedFiles.add(".externalToolsBuilders");    
-  }
-  
-  /*
-  public BlackListFilter(SyncContext context) {
-    excludedDirs.add(".svn");
-    excludedDirs.addAll(JToolsPropertiesUtil.getExcludedElements(context.getConfigFilePath(),
-        JPTConstants.EXCLUDED_DIR_KEY_SC));
-    excludedFiles.addAll(JToolsPropertiesUtil.getExcludedElements(context.getConfigFilePath(),
-        JPTConstants.EXCLUDED_FILES_KEY_SC));
-  }
-  */
+    excludedFiles.add(".externalToolsBuilders");
 
+    // options
+    excludedDirs.addAll(builder.excludedDirs);
+    excludedFiles.addAll(builder.excludedFiles);
+
+  }
+
+  public static class Builder {
+    private List<String> excludedDirs = new LinkedList<String>();
+    private List<String> excludedFiles = new LinkedList<String>();
+
+    public Builder excludedDirs(List<String> directories) {
+      excludedDirs.addAll(directories);
+      return this;
+    }
+
+    public Builder excludedFiles(List<String> files) {
+      excludedFiles.addAll(files);
+      return this;
+    }
+
+    public BlackListFilter build() {
+      return new BlackListFilter(this);
+    }
+  }
 
   public boolean accept(File file) {
-    // ignore directories
     if (excludedDirs.contains(file.getName())) {
       return false;
     }
 
-    // ignore files
     if (excludedFiles.contains(file.getName())) {
       return false;
     }
 
-    // ignore extensions
     for (String excludedExt : excludedExtensions) {
       if (file.getName().endsWith(excludedExt)) {
         return false;
       }
     }
 
-    // ignore regex patterns
     if (file.getName().matches(".*th-.*x.*")) {
       return false;
     }

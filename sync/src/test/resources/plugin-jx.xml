@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.4//EN" "https://community.jalios.com/dtd/jcms-plugin-1.4.dtd">
+<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.6//EN" "https://community.jalios.com/dtd/jcms-plugin-1.6.dtd">
 <plugin name="TestPlugin" 
         version="2.0.4" 
         author="Jalios SA" 
@@ -375,12 +375,8 @@
 
   <!-- ========================== Classes and Jars ======================== -->
   <java-classes>
-    <java class="com.jalios.jcmsplugin.jx.JXConstants" />
-    <java class="com.jalios.jcmsplugin.jx.JXUtils" />
-    <java class="com.jalios.jcmsplugin.jx.JXManager" />
-    <java class="com.jalios.jcmsplugin.jx.TypoComparator" />
-    <java class="com.jalios.jcmsplugin.jx.CustomMemoryAlert" /> 
-    <java class="com.jalios.jcmsplugin.jx.CustomMemoryMonitor"/> 
+    <java package="com.jalios.jcmsplugin.ticket" />
+	<java package="com.jalios.ejpt.test" />      
   </java-classes>
  
   <!-- ========================== Plugin Components ======================= -->                                                          

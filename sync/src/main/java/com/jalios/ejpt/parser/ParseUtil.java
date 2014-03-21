@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.xerces.parsers.SAXParser;
 import org.jdom.Document;
@@ -16,6 +14,8 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.xml.sax.EntityResolver;
+
+import com.jalios.ejpt.sync.utils.Util;
 
 public class ParseUtil {
 
@@ -37,7 +37,7 @@ public class ParseUtil {
 
   public static void fillElementPath(Collection<String> paths, List<Element> elmList, String prefix, String tagName,
       boolean deep, String matchAttribute, String matchValue) {
-    if (isEmpty(elmList)) {
+    if (Util.isEmpty(elmList)) {
       return;
     }
 
@@ -63,7 +63,7 @@ public class ParseUtil {
 
       // Check match value (attribute may have | separator)
       if (matchAttribute != null && matchValue != null) {
-        String[] itAttrValue = split(itFile.getAttributeValue(matchAttribute), "|");
+        String[] itAttrValue = Util.split(itFile.getAttributeValue(matchAttribute), "|");
         for (int i = 0; i < itAttrValue.length; i++) {
           if (matchValue.equals(itAttrValue[i])) {
             paths.add(prefix + itPath);
@@ -86,39 +86,7 @@ public class ParseUtil {
     return builder;
   }
 
-  public static boolean isEmpty(Collection<?> c) {
-    return c == null || c.size() == 0;
-  }
-
-  public static String[] split(String str, String delim) {
-    if (str == null) {
-      return null;
-    }
-    ArrayList<String> list = splitToList(str, delim);
-    return list.toArray(new String[list.size()]);
-  }
-
-  /**
-   * Splits a String into a list of String.
-   * 
-   * @param str
-   *          the String to split
-   * @param delim
-   *          the delimiter (same as StringTokenizer)
-   * @return an ArrayList of String.
-   * @see StringTokenizer
-   */
-  public static ArrayList<String> splitToList(String str, String delim) {
-    if (str == null) {
-      return null;
-    }
-    ArrayList<String> list = new ArrayList<String>();
-    StringTokenizer st = delim != null ? new StringTokenizer(str, delim) : new StringTokenizer(str);
-    while (st.hasMoreTokens()) {
-      list.add(st.nextToken().trim());
-    }
-    return list;
-  }
+  
 
   public static File getPrivatePluginDirectory(File pluginDirectory) {
     File rootDirectoryPlugins = new File(pluginDirectory, "WEB-INF/plugins");

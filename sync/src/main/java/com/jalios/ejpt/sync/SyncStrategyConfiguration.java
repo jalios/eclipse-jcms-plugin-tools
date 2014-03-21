@@ -3,36 +3,40 @@ package com.jalios.ejpt.sync;
 import java.io.File;
 
 public final class SyncStrategyConfiguration {
-  private File ppRootDir;
-  private File wpRootDir;
-  private String confPath;
+  private File pluginDirectory;
+  private File webappDirectory;
+  private File config;
   
-  private SyncStrategyConfiguration(Builder b) {
-    this.ppRootDir = b.ppRootDir;
-    this.wpRootDir = b.wpRootDir;
-    this.confPath = b.confPath;
+  private SyncStrategyConfiguration(Builder builder) {
+    this.pluginDirectory = builder.pluginDirectory;
+    this.webappDirectory = builder.webappDirectory;
+    this.config = builder.config;
   }
 
   public File getPluginProjectRootDir() {
-    return ppRootDir;
+    return pluginDirectory;
   }
 
   public File getWebappProjectRootDir() {
-    return wpRootDir;
+    return webappDirectory;
+  }
+  
+  public File getConfiguration() {
+    return config;
   }
   
   public static class Builder {
-    private File ppRootDir;
-    private File wpRootDir;
-    private String confPath;
+    private File pluginDirectory;
+    private File webappDirectory;
+    private File config;
 
     public Builder(File ppRootDir, File wpRootDir) {
-      this.ppRootDir = ppRootDir;
-      this.wpRootDir = wpRootDir;
+      this.pluginDirectory = ppRootDir;
+      this.webappDirectory = wpRootDir;
     }
 
-    public Builder conf(String confPath) {
-      this.confPath = confPath;
+    public Builder configuration(File config) {
+      this.config = config;
       return this;
     }
 
