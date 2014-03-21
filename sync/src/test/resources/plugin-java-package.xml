@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.6//EN" "http://support.jalios.com/dtd/jcms-plugin-1.6.dtd">
+<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.6//EN" "https://community.jalios.com/dtd/jcms-plugin-1.6.dtd">
 
 <plugin name="TestPlugin" version="0.2" author="Jalios SA" license="Jalios SA" initialize="true" jcms="" order="0" url="" jsync="false" appserver="">
   
@@ -20,7 +20,7 @@
   </types>
   
   <java-classes>
-    <java class="com.jalios.ejpt.test.MacUtil" />
+    <java package = "com.jalios.ejpt.test" />
   </java-classes>
   
   <plugincomponents>

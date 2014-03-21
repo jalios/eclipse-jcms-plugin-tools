@@ -80,7 +80,6 @@ public class ParseUtil {
 
   private static SAXBuilder getSAXBuilder(EntityResolver entityResolver) {
     SAXBuilder builder = new SAXBuilder(SAXParser.class.getName(), false);
-    builder.setExpandEntities(true);
     builder.setValidation(true);
     builder.setEntityResolver(entityResolver);
     return builder;

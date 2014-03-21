@@ -150,7 +150,29 @@ public class XmlSyncTest extends TestUtil {
         webappProjectDirectory).build();
     try {
       SyncStrategyReport report = strategy.run(configuration);
-      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 14);
+      assertEquals(report.countSyncFilesToPlugin(), 0);      
+      
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  @Test
+  public void syncJavaPackage() {
+    
+    try {
+      FileUtils.copyFile(getFileFromResource("plugin-java-package.xml"), new File(pluginProjectDirectory,
+          "WEB-INF/plugins/TestPlugin/plugin.xml"));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToWebapp(), 14);
       assertEquals(report.countSyncFilesToPlugin(), 0);      
       

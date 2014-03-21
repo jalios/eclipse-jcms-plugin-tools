@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.jalios.ejpt.TestUtil;
 import com.jalios.ejpt.sync.SyncUtil;
 
-public class ParserTest extends TestUtil{
+public class ParserTest extends TestUtil {
 
   private File tmpWebappProjectTestDirectory;
 
@@ -36,7 +36,7 @@ public class ParserTest extends TestUtil{
     } catch (IOException e) {
       e.printStackTrace();
     }
-    
+
   }
 
   private void createLightJcmsProjectStructure() {
@@ -51,12 +51,12 @@ public class ParserTest extends TestUtil{
     new File(webappProjectDirectory, "js").mkdirs();
     new File(webappProjectDirectory, "types").mkdirs();
     new File(webappProjectDirectory, "WEB-INF/classes").mkdirs();
-    new File(webappProjectDirectory, "WEB-INF/jalios").mkdirs();    
+    new File(webappProjectDirectory, "WEB-INF/jalios").mkdirs();
     new File(webappProjectDirectory, "WEB-INF/plugins/TestPlugin").mkdirs();
     new File(webappProjectDirectory, "plugins/TestPlugin/css").mkdirs();
     new File(webappProjectDirectory, "plugins/TestPlugin/docs").mkdirs();
     new File(webappProjectDirectory, "plugins/TestPlugin/js").mkdirs();
-    new File(webappProjectDirectory, "plugins/TestPlugin/jsp").mkdirs();    
+    new File(webappProjectDirectory, "plugins/TestPlugin/jsp").mkdirs();
     new File(webappProjectDirectory, "plugins/TestPlugin/types/PortletQueryForeachDetail").mkdirs();
     new File(webappProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages").mkdirs();
     new File(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test").mkdirs();
@@ -71,19 +71,17 @@ public class ParserTest extends TestUtil{
       new File(webappProjectDirectory, "plugins/TestPlugin/jsp/home.jsp").createNewFile();
       new File(webappProjectDirectory, "plugins/TestPlugin/jsp/target.jsp").createNewFile();
       new File(webappProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages/en.prop").createNewFile();
-      new File(webappProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages/fr.prop").createNewFile();      
-      new File(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test/BasicDataController.java")
-          .createNewFile();
-      new File(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test/MacUtil.java")
-      .createNewFile();   
+      new File(webappProjectDirectory, "WEB-INF/plugins/TestPlugin/properties/languages/fr.prop").createNewFile();
+      new File(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test/BasicDataController.java").createNewFile();
+      new File(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test/MacUtil.java").createNewFile();
       new File(webappProjectDirectory, "display.jsp").createNewFile();
       new File(webappProjectDirectory, "edit.jsp").createNewFile();
       new File(webappProjectDirectory, "index.jsp").createNewFile();
-      
-      FileUtils.copyFile(getFileFromResource("plugin-jx.xml"), new File(webappProjectDirectory,
-          "WEB-INF/plugins/TestPlugin/plugin.xml"));      
+
+      FileUtils.copyFile(getFileFromResource("plugin-java-package.xml"), new File(webappProjectDirectory,
+          "WEB-INF/plugins/TestPlugin/plugin.xml"));
       FileUtils.copyFile(getFileFromResource("jcms-plugin-1.6.dtd"), new File(webappProjectDirectory,
-          "WEB-INF/jalios/jcms-plugin-1.6.dtd"));            
+          "WEB-INF/jalios/jcms-plugin-1.6.dtd"));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -92,14 +90,9 @@ public class ParserTest extends TestUtil{
   @Test
   public void loadPluginXML() {
     // init a jcms structure with a plugin
-    ParsePlugin parser = ParsePlugin.getParser();    
-    PluginJCMS testPlugin = parser.analyze(webappProjectDirectory.getAbsolutePath(), "TestPlugin");
+    ParsePlugin parser = ParsePlugin.getParser();
+    PluginJCMS testPlugin = parser.analyze(webappProjectDirectory);
     assertNotNull(testPlugin);
-    /*
-    for (String filePath : testPlugin.getFilesPath()){
-      System.out.println(filePath);
-    }
-    */
   }
 
 }

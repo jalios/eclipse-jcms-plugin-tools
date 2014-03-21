@@ -142,7 +142,8 @@
     class CDATA #IMPLIED>
 <!ATTLIST java
     xmlns CDATA #FIXED ''
-    package CDATA #IMPLIED>
+    package CDATA #IMPLIED
+    excludes CDATA #IMPLIED>
 
 
 <!-- 

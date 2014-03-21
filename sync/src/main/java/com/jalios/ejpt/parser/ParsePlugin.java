@@ -37,7 +37,7 @@ public final class ParsePlugin {
 
   private static final ParsePlugin SINGLETON = new ParsePlugin();
   private String name = null;
-  private String webappDirectory;
+  private File rootDirectory;
   // Internal
   protected Document domStructure = null;
 
@@ -48,26 +48,9 @@ public final class ParsePlugin {
     return SINGLETON;
   }
 
-  public PluginJCMS analyze(String webappDirectory, String pluginName) {
-    this.webappDirectory = webappDirectory;
-    File pluginFile = new File(webappDirectory, "WEB-INF/plugins/" + pluginName + "/" + PLUGIN_XML);
-    if (!pluginFile.exists()) {
-      return null;
-    }
-
-    EntityResolver resolver = new JcmsEntityResolver(new File(webappDirectory, "WEB-INF"));
-    this.domStructure = ParseUtil.getDomStructure(pluginFile, resolver);
-    Element root = this.domStructure.getRootElement();
-    this.name = root.getAttributeValue("name");
-
-    PluginJCMS plugin = new PluginJCMS();
-    plugin.setFilesPath(getAllFiles(true, false));
-    return plugin;
-  }
-
-  public PluginJCMS analyze(File pluginDirectory) {
-
-    File pluginFile = new File(ParseUtil.getPrivatePluginDirectory(pluginDirectory), "/" + PLUGIN_XML);
+  public PluginJCMS analyze(File directory) {
+    this.rootDirectory = directory;
+    File pluginFile = new File(ParseUtil.getPrivatePluginDirectory(directory), "/" + PLUGIN_XML);
     if (!pluginFile.exists()) {
       return null;
     }
@@ -219,7 +202,10 @@ public final class ParsePlugin {
     for (Element itJava : javaClassesPath) {
       fillJavaSet(itJava, javaPaths, sources);
     }
-
+    
+    for (String javaPath : javaPaths){
+      System.out.println(javaPath);
+    }
     return javaPaths;
   }
 
@@ -628,19 +614,17 @@ public final class ParsePlugin {
 
   private void fillJavaSet(Element itJava, Set<String> pathSet, boolean sources) {
     String itClass = itJava.getAttributeValue("class");
-
     // Check attribute class
-    if (itClass == null) {
+    if (itClass != null) {
+      pathSet.addAll(getClassFiles(itClass));
       return;
-    }
-
-    pathSet.addAll(getClassFiles(itClass));
+    }    
 
     String itPackage = itJava.getAttributeValue("package");
     // Check attribute package
     if (itPackage != null) {
       // String excludesPattern = itJava.getAttributeValue("excludes");
-      pathSet.addAll(getPackageClassFiles(webappDirectory, itPackage, sources));
+      pathSet.addAll(getPackageClassFiles(rootDirectory, itPackage, sources));
       return;
     }
   }
@@ -652,9 +636,9 @@ public final class ParsePlugin {
     return pathSet;
   }
 
-  private Set<String> getPackageClassFiles(String realPath, String fullPackage, boolean sources) {
+  private Set<String> getPackageClassFiles(File realPath, String fullPackage, boolean sources) {
     String packagePath = fullPackage.replace('.', '/');
-    File packageFolder = new File(realPath + "/WEB-INF/classes/" + packagePath);
+    File packageFolder = new File(realPath,"/WEB-INF/classes/" + packagePath);
 
     Set<String> pathSet = new HashSet<String>(5);
 
@@ -666,7 +650,7 @@ public final class ParsePlugin {
     File[] files = packageFolder.listFiles(new FileFilter() {
       @Override
       public boolean accept(File file) {
-        return file.isDirectory() || file.getName().endsWith(".class");
+        return file.isDirectory() || file.getName().endsWith(".java");
       }
     });
 
