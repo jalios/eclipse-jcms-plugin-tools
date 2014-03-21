@@ -3,6 +3,7 @@ package com.jalios.ejpt.sync;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.jalios.ejpt.parser.ParsePlugin;
@@ -16,104 +17,126 @@ import com.jalios.ejpt.sync.filesyncstatus.FileShouldDeclare;
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 
 public class XmlSyncStrategy implements SyncStrategy {
-  private File webappProject;
-  private File pluginProject;
+  // global info for different internal strategies
   private FileFilter fileFilter;
+  private List<File> pluginXmlDeclaredFiles;
 
-  private void init(SyncStrategyConfiguration configuration) {
-    webappProject = configuration.getWebappProjectRootDir();
-    pluginProject = configuration.getPluginProjectRootDir();
-    if (configuration.getConfiguration() == null) {
-      fileFilter = new BlackListFilter.Builder().build();
-    } else {
-      SyncPropertyManager propertyManager = SyncPropertyManager.init(configuration.getConfiguration());
-      fileFilter = new BlackListFilter.Builder().excludedDirs(propertyManager.getExcludedDirs())
-          .excludedFiles(propertyManager.getExcludedFiles()).build();
-    }
+  private void cacheInfo(SyncStrategyConfiguration configuration) {
+    pluginXmlDeclaredFiles = getPluginXmlDeclaredFiles(configuration.getPluginProjectDirectory());
+    fileFilter = configuration.getFileFilter();
   }
 
   @Override
   public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException {
-    init(configuration);
-    SyncStrategyReport report = new SyncStrategyReport();
-    List<File> declaredFiles = getPluginXmlDeclaredFiles(pluginProject);
+    cacheInfo(configuration);
+    SyncStrategyReport finalReport = new SyncStrategyReport();
 
-    report.mergeReport(checkPhysicalFilesInPluginProject(declaredFiles));
+    List<SyncStrategy> internalStrategies = new LinkedList<SyncStrategy>();
+    internalStrategies.add(new FilesShoudBeDeclaredStrategy());
+    internalStrategies.add(new FilesFromPluginXmlStrategy());
+    internalStrategies.add(new NewFileFromWebappDirectoryStrategy());
 
-    report.mergeReport(checkPluginPublicDirectoryOnWebapp(pluginProject, webappProject, declaredFiles));
+    for (SyncStrategy syncStrategy : internalStrategies) {
+      finalReport.mergeReport(syncStrategy.run(configuration));
+    }
 
-    report.mergeReport(checkDeclaredFilesFromPluginXml(pluginProject, webappProject, declaredFiles));
-
-    return report;
+    return finalReport;
   }
 
-  private SyncStrategyReport checkPluginPublicDirectoryOnWebapp(File pluginProjectDirectory,
-      File webappProjectDirectory, List<File> declaredFiles) {
-    SyncStrategyReport report = new SyncStrategyReport();
-    File privatePluginDirectory = ParseUtil.getPrivatePluginDirectory(pluginProjectDirectory);
-    File pluginPublicDirectory = new File(webappProjectDirectory + "/plugins/" + privatePluginDirectory.getName());
+  private class FilesShoudBeDeclaredStrategy implements SyncStrategy {
 
-    if (!pluginPublicDirectory.exists()) {
+    @Override
+    public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException {
+      SyncStrategyReport report = new SyncStrategyReport();
+      List<File> filesShouldBeDeclared = new ArrayList<File>();
+
+      List<File> physicalFiles = SyncUtil.deepListFiles(configuration.getPluginProjectDirectory(), fileFilter);
+
+      for (File physicalFile : physicalFiles) {
+        if (!pluginXmlDeclaredFiles.contains(physicalFile)) {
+          filesShouldBeDeclared.add(physicalFile);
+        }
+      }
+      for (File itFile : filesShouldBeDeclared) {
+        report.addReport(new FileShouldDeclare(itFile), SyncStrategyReport.Direction.UNKNOWN);
+      }
       return report;
     }
 
-    List<File> filesInPluginPublicDirectory = SyncUtil.deepListFiles(pluginPublicDirectory, fileFilter);
-    for (File itFile : filesInPluginPublicDirectory) {
-      if (!containsByName(declaredFiles, itFile)) {
-        report.addReport(new FileCouldMissed(itFile), SyncStrategyReport.Direction.UNKNOWN);
-      }
-    }
-    return report;
   }
 
-  private SyncStrategyReport checkPhysicalFilesInPluginProject(List<File> declaredFiles) {
-    SyncStrategyReport report = new SyncStrategyReport();
-    List<File> filesShouldBeDeclared = new ArrayList<File>();
+  private class NewFileFromWebappDirectoryStrategy implements SyncStrategy {
 
-    List<File> physicalFiles = SyncUtil.deepListFiles(pluginProject, fileFilter);
+    @Override
+    public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException {
+      SyncStrategyReport report = new SyncStrategyReport();
+      File privatePluginDirectory = ParseUtil.getPrivatePluginDirectory(configuration.getPluginProjectDirectory());
+      File pluginPublicDirectory = new File(configuration.getWebappProjectDirectory(), "/plugins/"
+          + privatePluginDirectory.getName());
 
-    for (File physicalFile : physicalFiles) {
-      if (!declaredFiles.contains(physicalFile)) {
-        filesShouldBeDeclared.add(physicalFile);
+      if (!pluginPublicDirectory.exists()) {
+        return report;
       }
+
+      List<File> webappFilesByPluginXml = getPluginXmlDeclaredFiles(configuration.getWebappProjectDirectory());
+
+      for (File declareWebappFile : webappFilesByPluginXml) {
+        File pluginFile = SyncUtil.getDestinationFile(configuration.getPluginProjectDirectory(),
+            configuration.getWebappProjectDirectory(), declareWebappFile);
+
+        if (!pluginFile.exists()) {
+          FileSyncStatus fileAdded = new FileAdded(declareWebappFile, pluginFile);
+          report.addReport(fileAdded, SyncStrategyReport.Direction.TO_PLUGIN);
+        }
+      }
+
+      for (File itFile : SyncUtil.deepListFiles(pluginPublicDirectory, fileFilter)) {
+        if (!containsByName(pluginXmlDeclaredFiles, itFile)) {
+          report.addReport(new FileCouldMissed(itFile), SyncStrategyReport.Direction.UNKNOWN);
+        }
+      }
+
+      return report;
     }
-    for (File itFile : filesShouldBeDeclared) {
-      report.addReport(new FileShouldDeclare(itFile), SyncStrategyReport.Direction.UNKNOWN);
-    }
-    return report;
+
   }
 
-  private SyncStrategyReport checkDeclaredFilesFromPluginXml(File pluginProjectDirectory, File webappProjectDirectory,
-      List<File> declaredFiles) {
-    SyncStrategyReport report = new SyncStrategyReport();
+  private class FilesFromPluginXmlStrategy implements SyncStrategy {
 
-    for (File declaredPluginFile : declaredFiles) {
-      if (!declaredPluginFile.exists()) {
-        report.addReport(new FileNotFoundOnDisk(declaredPluginFile), SyncStrategyReport.Direction.UNKNOWN);
-        continue;
+    @Override
+    public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException {
+      SyncStrategyReport report = new SyncStrategyReport();
+
+      for (File declaredPluginFile : pluginXmlDeclaredFiles) {
+        if (!declaredPluginFile.exists()) {
+          report.addReport(new FileNotFoundOnDisk(declaredPluginFile), SyncStrategyReport.Direction.UNKNOWN);
+          continue;
+        }
+
+        File webappFile = SyncUtil.getDestinationFile(configuration.getWebappProjectDirectory(),
+            configuration.getPluginProjectDirectory(), declaredPluginFile);
+
+        if (!webappFile.exists()) {
+          FileSyncStatus fileAdded = new FileAdded(declaredPluginFile, webappFile);
+          report.addReport(fileAdded, SyncStrategyReport.Direction.TO_WEBAPP);
+          continue;
+        }
+
+        if (webappFile.lastModified() < declaredPluginFile.lastModified()) {
+          FileSyncStatus fileModified = new FileModified(declaredPluginFile, webappFile);
+          report.addReport(fileModified, SyncStrategyReport.Direction.TO_WEBAPP);
+          continue;
+        }
+
+        if (webappFile.lastModified() > declaredPluginFile.lastModified()) {
+          FileSyncStatus fileModified = new FileModified(webappFile, declaredPluginFile);
+          report.addReport(fileModified, SyncStrategyReport.Direction.TO_PLUGIN);
+        }
+
       }
-
-      File webappFile = SyncUtil.getDestinationFile(webappProjectDirectory, pluginProjectDirectory, declaredPluginFile);
-
-      if (!webappFile.exists()) {
-        FileSyncStatus fileAdded = new FileAdded(declaredPluginFile, webappFile);
-        report.addReport(fileAdded, SyncStrategyReport.Direction.TO_WEBAPP);
-        continue;
-      }
-
-      if (webappFile.lastModified() < declaredPluginFile.lastModified()) {
-        FileSyncStatus fileModified = new FileModified(declaredPluginFile, webappFile);
-        report.addReport(fileModified, SyncStrategyReport.Direction.TO_WEBAPP);
-        continue;
-      }
-
-      if (webappFile.lastModified() > declaredPluginFile.lastModified()) {
-        FileSyncStatus fileModified = new FileModified(webappFile, declaredPluginFile);
-        report.addReport(fileModified, SyncStrategyReport.Direction.TO_PLUGIN);
-      }
-
+      return report;
     }
-    return report;
+
   }
 
   /**
@@ -134,7 +157,7 @@ public class XmlSyncStrategy implements SyncStrategy {
       for (String declaredFilePath : info.getFilesPath()) {
         File declaredFile = new File(pluginProjectDirectory, declaredFilePath);
         if (declaredFile.isDirectory()) {
-          files.addAll(SyncUtil.deepListFiles(declaredFile, null));
+          files.addAll(SyncUtil.deepListFiles(declaredFile, fileFilter));
           continue;
         }
 

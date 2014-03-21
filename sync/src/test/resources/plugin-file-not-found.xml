@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin PUBLIC "-//JALIOS//DTD JCMS-PLUGIN 1.4//EN" "http://support.jalios.com/dtd/jcms-plugin-1.4.dtd">
+
+<plugin name="TestPlugin" version="0.2" author="Jalios SA" license="Jalios SA" initialize="true" jcms="" order="0" url="" jsync="false" appserver="">
+  
+  <label xml:lang="fr">Module Fiche MAC</label>
+  <description xml:lang="fr">Module Fiche MAC</description>
+  <types>
+    <type name="MAC">
+      <file path="doMACFullDisplay.jsp" />
+    </type>
+    
+    <templates type="PortletQueryForeachDetail">
+	  	<template name="custom" file="template.jsp" usage='box'>
+				<label xml:lang="en">Custom Template</label>
+				<label xml:lang="fr">Gabarit Custom</label>
+		</template>
+	</templates>
+    
+  </types>
+  
+  <java-classes>
+    <java class="com.jalios.ejpt.test.MacUtil" />
+  </java-classes>
+  
+  <plugincomponents>
+    <datacontroller class="com.jalios.ejpt.test.BasicDataController" types="Article" />
+    <datacontroller class="com.jalios.ejpt.test.NotFoundDataController" types="Article" />
+    
+  </plugincomponents>
+  
+  <private-files>
+    <file path="properties/plugin.prop" />
+    <file path="properties/languages/en.prop" />
+    <file path="properties/languages/fr.prop" />
+  </private-files>
+  <public-files>
+    <file path="css/plugin1.css" />    
+    <file path="css/plugin2.less" />
+    <file path="js/plugin.js" />
+    <directory path="jsp" />
+    <directory path="docs" />          
+  </public-files>
+</plugin>
+

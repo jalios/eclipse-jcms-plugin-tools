@@ -1,3 +1,16 @@
+/*
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License
+ */
 package com.jalios.ejpt.sync;
 
 import java.io.File;
@@ -6,6 +19,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 
+ * @author Xuan Tuong LE - lxtuong@gmail.com
+ *
+ */
 public class BlackListFilter implements FileFilter {
   private List<String> excludedDirs = new LinkedList<String>();
   private List<String> excludedFiles = new LinkedList<String>();
@@ -44,6 +62,7 @@ public class BlackListFilter implements FileFilter {
   }
 
   public boolean accept(File file) {
+    
     if (excludedDirs.contains(file.getName())) {
       return false;
     }

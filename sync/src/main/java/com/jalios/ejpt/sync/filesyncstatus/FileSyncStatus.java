@@ -2,11 +2,11 @@ package com.jalios.ejpt.sync.filesyncstatus;
 
 import java.io.File;
 
-public class FileSyncStatus {
+public abstract class FileSyncStatus {
   private File source;
   private File destination;
   
-  public FileSyncStatus(File source, File destination) {
+  protected FileSyncStatus(File source, File destination) {
     this.source = source;
     this.destination = destination;
   }
@@ -26,4 +26,7 @@ public class FileSyncStatus {
   public void setDestination(File destination) {
     this.destination = destination;
   }
+  
+  public abstract String getStatusName();
+  
 }

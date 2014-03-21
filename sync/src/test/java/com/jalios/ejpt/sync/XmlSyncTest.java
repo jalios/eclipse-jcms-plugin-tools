@@ -1,6 +1,6 @@
 package com.jalios.ejpt.sync;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +11,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jalios.ejpt.TestUtil;
+import com.jalios.ejpt.sync.filesyncstatus.FileAdded;
+import com.jalios.ejpt.sync.filesyncstatus.FileCouldMissed;
+import com.jalios.ejpt.sync.filesyncstatus.FileModified;
+import com.jalios.ejpt.sync.filesyncstatus.FileNotFoundOnDisk;
+import com.jalios.ejpt.sync.filesyncstatus.FileShouldDeclare;
+import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 
 public class XmlSyncTest extends TestUtil {
   private File tmpWebappProjectTestDirectory;
@@ -33,7 +39,7 @@ public class XmlSyncTest extends TestUtil {
 
   @After
   public void tearDown() {
-    
+
     try {
       FileUtils.deleteDirectory(tmpWebappProjectTestDirectory);
       FileUtils.deleteDirectory(tmpPluginProjectTestDirectory);
@@ -65,6 +71,9 @@ public class XmlSyncTest extends TestUtil {
     }
   }
 
+  /**
+   * 16 files
+   */
   private void createLightPluginProjectStructure() {
     new File(pluginProjectDirectory, "plugins/TestPlugin/css").mkdirs();
     new File(pluginProjectDirectory, "plugins/TestPlugin/docs").mkdirs();
@@ -125,113 +134,268 @@ public class XmlSyncTest extends TestUtil {
       report.run(new CopyExecutor());
       assertEquals(report.countSyncFilesToWebapp(), 16);
       assertEquals(report.countSyncFilesToPlugin(), 0);
-      
+
       report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToWebapp(), 0);
       assertEquals(report.countSyncFilesToPlugin(), 0);
-      
+
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void checkFileAddedToWebapp() {
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
+      assertEquals(report.countSyncFilesToWebapp(), 16);
+
+      for (FileSyncStatus syncStatus : report.getSyncFilesToWebapp()) {
+        assertTrue(syncStatus instanceof FileAdded);
+      }
+
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
   
   @Test
+  public void checkFileAddedToPlugin() {
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
+      assertEquals(report.countSyncFilesToWebapp(), 16);
+      report.run(new CopyExecutor());
+
+      for (FileSyncStatus syncStatus : report.getSyncFilesToWebapp()) {
+        assertTrue(syncStatus instanceof FileAdded);
+      }
+      
+
+      try {
+        new File(webappProjectDirectory, "plugins/TestPlugin/jsp/new-jsp.jsp").createNewFile();
+      } catch (IOException e) {
+        fail(e.getMessage());
+      }
+      report = strategy.run(configuration);
+      assertEquals(report.countSyncFilesToPlugin(), 1);
+
+    } catch (SyncStrategyException e) {
+      e.printStackTrace();
+    }
+  }
+  
+
+  @Test
+  public void checkFileModified() {
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
+      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 16);
+
+      try {
+        FileUtils.touch(FileUtils.getFile(pluginProjectDirectory,
+            "WEB-INF/classes/com/jalios/ejpt/test/BasicDataController.java"));
+        FileUtils.touch(FileUtils.getFile(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test/MacUtil.java"));
+      } catch (IOException e) {
+        fail("Cannot touch files to test this case");
+      }
+
+      report = strategy.run(configuration);
+      assertEquals(report.countSyncFilesToWebapp(), 1);
+      assertEquals(report.countSyncFilesToPlugin(), 1);
+
+      for (FileSyncStatus syncStatus : report.getSyncFilesToWebapp()) {
+        assertTrue(syncStatus instanceof FileModified);
+      }
+      for (FileSyncStatus syncStatus : report.getSyncFilesToPlugin()) {
+        assertTrue(syncStatus instanceof FileModified);
+      }
+
+    } catch (SyncStrategyException e) {
+      fail(e.getMessage());
+    }
+  }
+
+  @Test
+  public void checkFileNotFoundOnDisk() {
+    try {
+      FileUtils.copyFile(getFileFromResource("plugin-file-not-found.xml"), new File(pluginProjectDirectory,
+          "WEB-INF/plugins/TestPlugin/plugin.xml"));
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
+      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 16);
+      assertEquals(report.getSyncFilesUnknown().size(), 1);
+
+      FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
+      assertTrue(syncStatus instanceof FileNotFoundOnDisk);
+
+    } catch (SyncStrategyException e) {
+      fail(e.getMessage());
+    }
+  }
+
+  @Test
+  public void checkFileShoudBeDeclareInPluginXML() {
+    try {
+      new File(pluginProjectDirectory, "plugins/TestPlugin/css/css-not-found-in-plugin-xml.css").createNewFile();
+    } catch (IOException e) {
+      fail(e.getMessage());
+    }
+
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
+      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 16);
+      assertEquals(report.getSyncFilesUnknown().size(), 1);
+
+      FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
+      assertTrue(syncStatus instanceof FileShouldDeclare);
+    } catch (SyncStrategyException e) {
+      fail(e.getMessage());
+    }
+  }
+  
+  @Test
+  public void checkFileCouldBeMissedWebappProject() {
+   
+
+    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
+        webappProjectDirectory).build();
+    try {
+      SyncStrategyReport report = strategy.run(configuration);
+      report.run(new CopyExecutor());
+      assertEquals(report.countSyncFilesToWebapp(), 16);
+      
+      try {
+        new File(webappProjectDirectory, "plugins/TestPlugin/css/css-could-missed-in-public-directory.css").createNewFile();
+      } catch (IOException e) {
+        fail(e.getMessage());
+      }
+      report = strategy.run(configuration);
+      assertEquals(report.getSyncFilesUnknown().size(), 1);
+
+      FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
+      assertTrue(syncStatus instanceof FileCouldMissed);            
+    } catch (SyncStrategyException e) {
+      fail(e.getMessage());
+    }
+  }
+
+  @Test
   public void syncExcludeJsp() {
-    
+
     try {
       FileUtils.copyFile(getFileFromResource("plugin-nojsp.xml"), new File(pluginProjectDirectory,
           "WEB-INF/plugins/TestPlugin/plugin.xml"));
     } catch (IOException e1) {
       e1.printStackTrace();
     }
-    
+
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
       SyncStrategyReport report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToWebapp(), 14);
-      assertEquals(report.countSyncFilesToPlugin(), 0);      
-      
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
-  
+
   @Test
   public void syncJavaPackage() {
-    
+
     try {
       FileUtils.copyFile(getFileFromResource("plugin-java-package.xml"), new File(pluginProjectDirectory,
           "WEB-INF/plugins/TestPlugin/plugin.xml"));
     } catch (IOException e) {
       e.printStackTrace();
     }
-    
+
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
       SyncStrategyReport report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToWebapp(), 14);
-      assertEquals(report.countSyncFilesToPlugin(), 0);      
-      
+      assertEquals(report.countSyncFilesToPlugin(), 0);
+
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
-  
+
   @Test
   public void syncWithoutConfiguration() {
 
-    try {     
-      new File(pluginProjectDirectory, ".settings").mkdirs();      
+    try {
+      new File(pluginProjectDirectory, ".settings").mkdirs();
       // 2 new files in configuration
-      new File(pluginProjectDirectory, ".jcmsNaturePlugin").createNewFile();      
+      new File(pluginProjectDirectory, ".jcmsNaturePlugin").createNewFile();
       new File(pluginProjectDirectory, ".settings/foobar.xml").createNewFile();
     } catch (IOException e1) {
       e1.printStackTrace();
     }
-    
-    
+
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
-      SyncStrategyReport report = strategy.run(configuration);      
-      assertEquals(report.getSyncFilesUnknown().size(), 2);            
-      
+      SyncStrategyReport report = strategy.run(configuration);
+      assertEquals(report.getSyncFilesUnknown().size(), 2);
+
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
-  
+
   @Test
   public void syncWithExcludeOptions() {
 
     try {
-      FileUtils.copyFile(getFileFromResource("sync.conf"), new File(tmpWebappProjectTestDirectory,
-          "sync.conf"));
-      new File(pluginProjectDirectory, ".settings").mkdirs();   
-      new File(pluginProjectDirectory, ".foo").mkdirs();      
+      FileUtils.copyFile(getFileFromResource("sync.conf"), new File(tmpWebappProjectTestDirectory, "sync.conf"));
+      new File(pluginProjectDirectory, ".settings").mkdirs();
+      new File(pluginProjectDirectory, ".foo").mkdirs();
 
       // 3 files to exclude from sync
-      new File(pluginProjectDirectory, ".jcmsNaturePlugin").createNewFile();      
+      new File(pluginProjectDirectory, ".jcmsNaturePlugin").createNewFile();
       new File(pluginProjectDirectory, ".anotherFile").createNewFile();
       new File(pluginProjectDirectory, ".settings/foobar.xml").createNewFile();
       new File(pluginProjectDirectory, ".foo/foobar.xml").createNewFile();
     } catch (IOException e1) {
       e1.printStackTrace();
     }
-    
-    
+
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).configuration(getFileFromResource("sync.conf")).build();
     try {
-      SyncStrategyReport report = strategy.run(configuration);      
-      assertEquals(report.getSyncFilesUnknown().size(), 0);            
-      
+      SyncStrategyReport report = strategy.run(configuration);
+      assertEquals(report.getSyncFilesUnknown().size(), 0);
+
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }

@@ -203,9 +203,6 @@ public final class ParsePlugin {
       fillJavaSet(itJava, javaPaths, sources);
     }
     
-    for (String javaPath : javaPaths){
-      System.out.println(javaPath);
-    }
     return javaPaths;
   }
 

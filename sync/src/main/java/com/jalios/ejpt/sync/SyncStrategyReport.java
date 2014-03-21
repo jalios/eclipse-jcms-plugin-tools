@@ -41,10 +41,6 @@ public final class SyncStrategyReport {
     map.put(Direction.UNKNOWN, new ArrayList<FileSyncStatus>());
     
   }
-
-  public void addCopyReport(File source, File destination, Direction direction) {
-    map.get(direction).add(new FileSyncStatus(source, destination));
-  }
   
   public void addReport(FileSyncStatus syncFile, Direction direction) {
     map.get(direction).add(syncFile);

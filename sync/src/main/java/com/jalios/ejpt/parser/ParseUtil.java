@@ -15,6 +15,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.xml.sax.EntityResolver;
 
+import com.jalios.ejpt.sync.BlackListFilter;
 import com.jalios.ejpt.sync.utils.Util;
 
 public class ParseUtil {
@@ -90,10 +91,10 @@ public class ParseUtil {
   public static File getPrivatePluginDirectory(File pluginDirectory) {
     File rootDirectoryPlugins = new File(pluginDirectory, "WEB-INF/plugins");
     File pluginPrivateDirectory = null;
-
+    File[] rootDirectories = rootDirectoryPlugins.listFiles(new BlackListFilter.Builder().build());
     // only one
-    if (rootDirectoryPlugins.isDirectory() && (rootDirectoryPlugins.listFiles().length == 1)) {
-      pluginPrivateDirectory = rootDirectoryPlugins.listFiles()[0];
+    if (rootDirectoryPlugins.isDirectory() && (rootDirectories.length == 1)) {
+      pluginPrivateDirectory = rootDirectories[0];
     }
     return pluginPrivateDirectory;
   }
