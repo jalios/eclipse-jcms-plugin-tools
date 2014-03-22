@@ -19,7 +19,7 @@
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/egit/updates"/>
+      <update label="%updateSiteName" url="https://github.com/jalios/eclipse-jcms-plugin-tools"/>
    </url>
 
    <plugin
