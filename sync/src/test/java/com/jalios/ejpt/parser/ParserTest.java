@@ -24,9 +24,7 @@ public class ParserTest extends TestUtil {
     tmpWebappProjectTestDirectory = SyncUtil.createTempDir();
     webappProjectDirectory = new File(tmpWebappProjectTestDirectory, "webappproject");
     webappProjectDirectory.mkdirs();
-    createLightJcmsProjectStructure();
-    System.out.println(webappProjectDirectory.getAbsolutePath());
-
+    createDirectoryForParsing();
   }
 
   @After
@@ -39,7 +37,7 @@ public class ParserTest extends TestUtil {
 
   }
 
-  private void createLightJcmsProjectStructure() {
+  private void createDirectoryForParsing() {
     new File(webappProjectDirectory, "admin").mkdirs();
     new File(webappProjectDirectory, "css").mkdirs();
     new File(webappProjectDirectory, "custom").mkdirs();

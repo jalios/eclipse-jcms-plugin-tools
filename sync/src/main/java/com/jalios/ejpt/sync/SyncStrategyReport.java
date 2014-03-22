@@ -13,7 +13,6 @@
  */
 package com.jalios.ejpt.sync;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
  * 
  */
 public final class SyncStrategyReport {
+  // only for package
   enum Direction {
     TO_WEBAPP, TO_PLUGIN, UNKNOWN;
   }

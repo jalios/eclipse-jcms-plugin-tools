@@ -22,8 +22,8 @@ public class XmlSyncStrategy implements SyncStrategy {
   private List<File> pluginXmlDeclaredFiles;
 
   private void cacheInfo(SyncStrategyConfiguration configuration) {
-    pluginXmlDeclaredFiles = getPluginXmlDeclaredFiles(configuration.getPluginProjectDirectory());
     fileFilter = configuration.getFileFilter();
+    pluginXmlDeclaredFiles = getPluginXmlDeclaredFiles(configuration.getPluginProjectDirectory());
   }
 
   @Override
@@ -151,7 +151,7 @@ public class XmlSyncStrategy implements SyncStrategy {
     ParsePlugin parser = ParsePlugin.getParser();
     PluginJCMS info = parser.analyze(pluginProjectDirectory);
 
-    List<File> files = new ArrayList<File>();
+    List<File> files = new LinkedList<File>();
 
     if (info != null) {
       for (String declaredFilePath : info.getFilesPath()) {
@@ -163,7 +163,7 @@ public class XmlSyncStrategy implements SyncStrategy {
 
         files.add(new File(pluginProjectDirectory, declaredFilePath));
       }
-    }
+    }    
     return files;
   }
 
