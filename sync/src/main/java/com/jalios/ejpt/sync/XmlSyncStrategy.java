@@ -84,11 +84,15 @@ public class XmlSyncStrategy implements SyncStrategy {
       List<File> webappFilesByPluginXml = getPluginXmlDeclaredFiles(configuration.getWebappProjectDirectory());
 
       for (File declareWebappFile : webappFilesByPluginXml) {
-        File pluginFile = SyncUtil.getDestinationFile(configuration.getPluginProjectDirectory(),
+        if (!declareWebappFile.exists()){
+          continue;
+        }
+        
+        File destinationFile = SyncUtil.getDestinationFile(configuration.getPluginProjectDirectory(),
             configuration.getWebappProjectDirectory(), declareWebappFile);
 
-        if (!pluginFile.exists()) {
-          FileSyncStatus fileAdded = new FileAdded(declareWebappFile, pluginFile);
+        if (!destinationFile.exists()) {
+          FileSyncStatus fileAdded = new FileAdded(declareWebappFile, destinationFile);
           report.addReport(fileAdded, SyncStrategyReport.Direction.TO_PLUGIN);
         }
       }
@@ -145,26 +149,26 @@ public class XmlSyncStrategy implements SyncStrategy {
   /**
    * Get files declared in plugin.xml
    * 
-   * @param pluginProjectDirectory
+   * @param directory
    *          plugin projet directory
    * @return List&ltFile&gt
    */
-  private List<File> getPluginXmlDeclaredFiles(File pluginProjectDirectory) {
+  private List<File> getPluginXmlDeclaredFiles(File directory) {
     // check status from plugin.xml
     ParsePlugin parser = ParsePlugin.getParser();
-    PluginJCMS info = parser.analyze(pluginProjectDirectory);
+    PluginJCMS info = parser.analyze(directory);
 
     List<File> files = new LinkedList<File>();
 
     if (info != null) {
       for (String declaredFilePath : info.getFilesPath()) {
-        File declaredFile = new File(pluginProjectDirectory, declaredFilePath);
+        File declaredFile = new File(directory, declaredFilePath);
         if (declaredFile.isDirectory()) {
           files.addAll(SyncUtil.deepListFiles(declaredFile, fileFilter));
           continue;
         }
 
-        files.add(new File(pluginProjectDirectory, declaredFilePath));
+        files.add(new File(directory, declaredFilePath));
       }
     }    
     return files;

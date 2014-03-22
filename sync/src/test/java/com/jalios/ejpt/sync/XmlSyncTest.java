@@ -161,7 +161,7 @@ public class XmlSyncTest extends TestUtil {
       e.printStackTrace();
     }
   }
-  
+
   @Test
   public void checkFileAddedToPlugin() {
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
@@ -175,21 +175,27 @@ public class XmlSyncTest extends TestUtil {
       for (FileSyncStatus syncStatus : report.getSyncFilesToWebapp()) {
         assertTrue(syncStatus instanceof FileAdded);
       }
-      
 
       try {
         new File(webappProjectDirectory, "plugins/TestPlugin/jsp/new-jsp.jsp").createNewFile();
+        FileUtils.deleteQuietly(FileUtils.getFile(new File(pluginProjectDirectory,
+            "WEB-INF/data/types/MAC/MAC-templates.xml")));
+        FileUtils.deleteQuietly(FileUtils.getFile(new File(webappProjectDirectory,
+            "WEB-INF/data/types/MAC/MAC-templates.xml")));
       } catch (IOException e) {
         fail(e.getMessage());
       }
-      report = strategy.run(configuration);
+      report = strategy.run(configuration);      
       assertEquals(report.countSyncFilesToPlugin(), 1);
+
+      FileSyncStatus ss = report.getSyncFilesToPlugin().iterator().next();
+      assertTrue(ss instanceof FileAdded);
+      assertTrue(ss.getDestination().equals(FileUtils.getFile(pluginProjectDirectory, "plugins/TestPlugin/jsp/new-jsp.jsp")));
 
     } catch (SyncStrategyException e) {
       e.printStackTrace();
     }
   }
-  
 
   @Test
   public void checkFileModified() {
@@ -274,10 +280,9 @@ public class XmlSyncTest extends TestUtil {
       fail(e.getMessage());
     }
   }
-  
+
   @Test
   public void checkFileCouldBeMissedWebappProject() {
-   
 
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
@@ -286,9 +291,10 @@ public class XmlSyncTest extends TestUtil {
       SyncStrategyReport report = strategy.run(configuration);
       report.run(new CopyExecutor());
       assertEquals(report.countSyncFilesToWebapp(), 16);
-      
+
       try {
-        new File(webappProjectDirectory, "plugins/TestPlugin/css/css-could-missed-in-public-directory.css").createNewFile();
+        new File(webappProjectDirectory, "plugins/TestPlugin/css/css-could-missed-in-public-directory.css")
+            .createNewFile();
       } catch (IOException e) {
         fail(e.getMessage());
       }
@@ -296,7 +302,7 @@ public class XmlSyncTest extends TestUtil {
       assertEquals(report.getSyncFilesUnknown().size(), 1);
 
       FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
-      assertTrue(syncStatus instanceof FileCouldMissed);            
+      assertTrue(syncStatus instanceof FileCouldMissed);
     } catch (SyncStrategyException e) {
       fail(e.getMessage());
     }
