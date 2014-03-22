@@ -71,6 +71,9 @@ public class XmlSyncStrategy implements SyncStrategy {
     public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException {
       SyncStrategyReport report = new SyncStrategyReport();
       File privatePluginDirectory = ParseUtil.getPrivatePluginDirectory(configuration.getPluginProjectDirectory());
+      if (privatePluginDirectory == null){
+        return report;
+      }
       File pluginPublicDirectory = new File(configuration.getWebappProjectDirectory(), "/plugins/"
           + privatePluginDirectory.getName());
 
