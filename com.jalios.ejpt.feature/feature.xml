@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.jalios.ejpt.feature"
+      label="%featureName"
+      version="2.0.0.beta"
+      provider-name="%providerName"
+      plugin="com.jalios.ejpt">
+
+   <description url="http://www.example.com/description">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      [Enter License Description here.]
+   </license>
+
+   <url>
+      <update label="%updateSiteName" url="http://download.eclipse.org/egit/updates"/>
+   </url>
+
+   <plugin
+         id="com.jalios.ejpt"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
