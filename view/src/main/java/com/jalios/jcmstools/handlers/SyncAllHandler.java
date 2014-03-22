@@ -95,10 +95,11 @@ public class SyncAllHandler extends AbstractHandler {
       }
 
       // init configuration and sync context
-      String cfPath = EJPTUtil.getSyncConfigurationFilePath(jcmsWebappProject);
+      File config = EJPTUtil.getSyncConfigurationFilePath(jcmsWebappProject);
       File ppPath = jcmsPluginProject.getLocation().toFile();
       File wpPath = new File(EJPTUtil.getWebappDirectoryPath(jcmsWebappProject));
-      SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(ppPath, wpPath).conf(cfPath).build();
+      SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(ppPath, wpPath).configuration(config)
+          .build();
 
       run(conf, preview);
       SyncHandlerUtil.refreshProject(jcmsPluginProject);

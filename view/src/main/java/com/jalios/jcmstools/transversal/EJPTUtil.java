@@ -76,18 +76,18 @@ public class EJPTUtil {
     return consoleResult;
   }
 
-  public static String getSyncConfigurationFilePath(IResource webappResource) {
+  public static File getSyncConfigurationFilePath(IResource webappResource) {
     IPath webappLocation = webappResource.getLocation();
     if (webappLocation == null) {
-      return "";
+      return null;
     }
 
     for (File file : webappLocation.toFile().listFiles()) {
       if (EJPTConstants.SYNC_CONF_FILENAME.equals(file.getName())) {
-        return file.getAbsolutePath();
+        return file;
       }
     }
-    return "";
+    return null;
   }
 
   private static boolean isPropertyExist(IPath webappLocation, String propertyKeyName) {

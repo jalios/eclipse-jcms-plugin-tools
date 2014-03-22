@@ -14,6 +14,7 @@
 package com.jalios.jcmstools.handlers;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -50,7 +51,7 @@ public class SyncHandler extends AbstractHandler {
    * The constructor.
    */
   public SyncHandler() {
-
+    
   }
 
   private boolean isPreview(Command cmd) {
@@ -66,31 +67,38 @@ public class SyncHandler extends AbstractHandler {
    * from the application context.
    */
   public Object execute(ExecutionEvent event) throws ExecutionException {
+    MessageConsole console = EJPTUtil.findConsoleByName(CONSOLE_NAME);
+    console.activate();
+    consoleStream = console.newMessageStream();
+    
     preview = isPreview(event.getCommand());
 
-    initProjectsFromEvent(event);
+    pluginProject = EJPTUtil.getSyncProject(event);
+
+    if (pluginProject == null) {
+      consoleStream.println("Cannot detect plugin project. Make sure that you launch on the plugin project.");
+      consoleStream.println("Operation aborted.");
+      return null;
+    }
+
+    webappProject = EJPTUtil.getJcmsWebappProject(pluginProject);
 
     if (!initializeProjectsOK()) {
       return null;
     }
 
     // init configuration and sync context
-    String cfPath = EJPTUtil.getSyncConfigurationFilePath(webappProject);
+    File config = EJPTUtil.getSyncConfigurationFilePath(webappProject);
     File ppPath = pluginProject.getLocation().toFile();
     File wpPath = new File(EJPTUtil.getWebappDirectoryPath(webappProject));
-    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(ppPath, wpPath).conf(cfPath)
-        .build();
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(ppPath, wpPath).configuration(
+        config).build();
 
     run(configuration);
     SyncHandlerUtil.refreshProject(pluginProject);
     SyncHandlerUtil.refreshProject(webappProject);
 
     return null;
-  }
-
-  private void initProjectsFromEvent(ExecutionEvent event) {
-    pluginProject = EJPTUtil.getSyncProject(event);
-    webappProject = EJPTUtil.getJcmsWebappProject(pluginProject);
   }
 
   private boolean initializeProjectsOK() {
@@ -113,9 +121,7 @@ public class SyncHandler extends AbstractHandler {
 
   private void run(SyncStrategyConfiguration configuration) {
     long start = System.currentTimeMillis();
-    MessageConsole console = EJPTUtil.findConsoleByName(CONSOLE_NAME);
-    console.activate();
-    consoleStream = console.newMessageStream();
+
 
     SyncStrategyReport report = new SyncStrategyReport();
 
@@ -143,32 +149,34 @@ public class SyncHandler extends AbstractHandler {
 
     if (preview) {
       consoleStream.println("-----------------------------------------------------------");
-      consoleStream.println("This is only a PREVIEW status. I haven't done anything");
+      consoleStream.println("This is only a PREVIEW status. NOTHING HAS BEEN DONE");
     }
 
     consoleStream.println("************");
     consoleStream.println("Summary : ");
-    consoleStream.println("Webapp directory : " + EJPTUtil.getWebappDirectoryPath(webappProject));    
-    consoleStream.println("Plugin directory : " + pluginProject.getLocation().toFile());        
+    consoleStream.println("Date : " + Calendar.getInstance().getTime());
+    consoleStream.println("Webapp directory : " + EJPTUtil.getWebappDirectoryPath(webappProject));
+    consoleStream.println("Plugin directory : " + pluginProject.getLocation().toFile());
     consoleStream.println("W->P : " + syncFilesToPlugin.size() + " files ");
     consoleStream.println("P->W : " + syncFilesToWebapp.size() + " files ");
     consoleStream.println("?->? : " + syncFilesUnknown.size() + " files ");
     consoleStream.println("************");
     if (syncFilesUnknown.size() != 0) {
-      consoleStream.println("NOTE :");
-      consoleStream.println("(MISSED_DISK) Files declared in plugin.xml but don't exist on disk. Recheck your plugin.xml");
+      consoleStream.println("Note on status :");
+      consoleStream
+          .println("(MISSED_DISK) Files declared in plugin.xml but don't exist on disk. Recheck your plugin.xml");
       consoleStream.println("(MISSED_DECLARE) Theses files should (?) be declared in plugin.xml but it's not the case");
     }
     consoleStream.println("-----------------------------------------------------------");
-
-    for (FileSyncStatus sf : syncFilesToPlugin) {
-      consoleStream.println("(" + sf.getNatureOpName() + ") " + "W->P : " + sf.getTgt());
+        
+    for (FileSyncStatus syncStatus : syncFilesToPlugin) {
+      consoleStream.println("(" + syncStatus.getStatusName() + ") " + "W->P : " + syncStatus.getDestination());
     }
     for (FileSyncStatus sf : syncFilesToWebapp) {
-      consoleStream.println("(" + sf.getNatureOpName() + ") " + "P->W : " + sf.getTgt());
+      consoleStream.println("(" + sf.getStatusName() + ") " + "P->W : " + sf.getDestination());
     }
     for (FileSyncStatus sf : syncFilesUnknown) {
-      consoleStream.println("(" + sf.getNatureOpName() + ") " + "?->? : " + sf.getTgt());
+      consoleStream.println("(" + sf.getStatusName() + ") " + "?->? : " + sf.getDestination());
     }
   }
 
