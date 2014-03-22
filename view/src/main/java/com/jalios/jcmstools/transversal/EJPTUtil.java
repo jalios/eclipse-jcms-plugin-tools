@@ -183,7 +183,7 @@ public class EJPTUtil {
     // action is
     // called
     IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
-    if (activeEditor != null) {
+    if (activeEditor instanceof IFileEditorInput) {
       IFileEditorInput input = (IFileEditorInput) activeEditor.getEditorInput();
       syncProject = input.getFile().getProject();
 

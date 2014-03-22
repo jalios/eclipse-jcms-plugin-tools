@@ -22,29 +22,25 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.jalios.ejpt.sync.CopyExecutor;
-import com.jalios.ejpt.sync.SyncStrategy;
 import com.jalios.ejpt.sync.SyncStrategyConfiguration;
 import com.jalios.ejpt.sync.SyncStrategyException;
 import com.jalios.ejpt.sync.SyncStrategyReport;
-import com.jalios.ejpt.sync.XmlSyncStrategy;
 import com.jalios.jcmstools.transversal.EJPTUtil;
 
 /**
- * Our sample handler extends AbstractHandler, an IHandler base class.
+ * Handler for action preview and real sync for ALL projects
  * 
- * @see org.eclipse.core.commands.IHandler
- * @see org.eclipse.core.commands.AbstractHandler
+ * @author Xuan Tuong LE (lxtuong@gmail.com - @lxtuong)
  */
 public class SyncAllHandler extends AbstractHandler {
   public static final String ID = "SyncAllHandler";
   public static final String ID_PREVIEW_CMD = "com.jalios.commands.previewall";
   private static final String CONSOLE_NAME = "Jalios Plugin Tools - Sync Status";
   private boolean preview = true;
+  private MessageConsoleStream consoleStream;
 
   /**
    * The constructor.
@@ -75,55 +71,58 @@ public class SyncAllHandler extends AbstractHandler {
         return null;
       }
     }
-    MessageConsole console = EJPTUtil.findConsoleByName(CONSOLE_NAME);
-    console.activate();
-    MessageConsoleStream stream = console.newMessageStream();
+    consoleStream = SyncHandlerUtil.initConsole(CONSOLE_NAME);
 
     for (IProject jcmsPluginProject : EJPTUtil.getJCMSPluginProjects()) {
-      stream.println("\n---------------------------------------------------");
-      stream.println("Begin Sync for project '" + jcmsPluginProject + "'");
-      stream.println("---------------------------------------------------");
+      consoleStream.println("\n---------------------------------------------------");
+      consoleStream.println("Begin Sync for project '" + jcmsPluginProject + "'");
+      consoleStream.println("---------------------------------------------------");
 
       // determine projects to sync
       IProject jcmsWebappProject = EJPTUtil.getJcmsWebappProject(jcmsPluginProject);
 
       if (jcmsWebappProject == null) {
-        stream.println("Please link the JCMSPlugin project to a webapp project. Right-click on " + jcmsPluginProject
-            + " > Properties > Project References > Choose the webapp project");
-        stream.println("Operation aborted.");
+        consoleStream.println("Please link the JCMSPlugin project to a webapp project. Right-click on "
+            + jcmsPluginProject + " > Properties > Project References > Choose the webapp project");
+        consoleStream.println("Operation aborted.");
         break; // next project
       }
 
       // init configuration and sync context
       File config = EJPTUtil.getSyncConfigurationFilePath(jcmsWebappProject);
-      File ppPath = jcmsPluginProject.getLocation().toFile();
-      File wpPath = new File(EJPTUtil.getWebappDirectoryPath(jcmsWebappProject));
-      SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(ppPath, wpPath).configuration(config)
-          .build();
+      File pluginDirectory = jcmsPluginProject.getLocation().toFile();
+      File webappDirectory = new File(EJPTUtil.getWebappDirectoryPath(jcmsWebappProject));
+      SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(pluginDirectory, webappDirectory)
+          .configuration(config).build();
 
-      run(conf, preview);
+      run(conf, preview, pluginDirectory, webappDirectory);
       SyncHandlerUtil.refreshProject(jcmsPluginProject);
       SyncHandlerUtil.refreshProject(jcmsWebappProject);
 
-      stream.println("\n---------------------------------------------------");
-      stream.println("END Sync for project '" + jcmsPluginProject + "'");
-      stream.println("---------------------------------------------------\n");
+      consoleStream.println("\n---------------------------------------------------");
+      consoleStream.println("END Sync for project '" + jcmsPluginProject + "'");
+      consoleStream.println("---------------------------------------------------\n");
     }
     return null;
   }
 
-  private void run(SyncStrategyConfiguration configuration, boolean isPreview) {
+  private void run(SyncStrategyConfiguration configuration, boolean isPreview, File pluginDirectory,
+      File webappDirectory) {
+    long start = System.currentTimeMillis();
     SyncStrategyReport report = new SyncStrategyReport();
-
-    SyncStrategy sync = new XmlSyncStrategy();
     try {
-      report = sync.run(configuration);
-      if (!isPreview) {
-        report.run(new CopyExecutor());
+      if (preview) {
+        report = SyncHandlerUtil.previewSync(configuration);
+      } else {
+        report = SyncHandlerUtil.sync(configuration);
       }
-
     } catch (SyncStrategyException e) {
-      e.printStackTrace();
+      consoleStream.println(e.getMessage());
     }
+    SyncHandlerUtil.printReportToConsole(report, consoleStream, preview, webappDirectory.getAbsolutePath(),
+        pluginDirectory.getAbsolutePath());
+    consoleStream.println("-----------------------------------------------------------");
+    consoleStream.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
+
   }
 }
