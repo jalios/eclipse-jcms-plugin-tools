@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jalios Tools Plugin for Eclipse
-Bundle-SymbolicName: com.jalios.jpt;singleton:=true
-Bundle-Version: 0.2.3.qualifier
+Bundle-SymbolicName: com.jalios.ejpt;singleton:=true
+Bundle-Version: 2.0.0.beta
 Bundle-Activator: com.jalios.jpt.Activator
 Bundle-Vendor: Jalios
 Require-Bundle: org.eclipse.ui,
