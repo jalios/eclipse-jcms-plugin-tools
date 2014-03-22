@@ -82,6 +82,9 @@ public class Util {
 
   public static Properties loadProperties(File file) {
     Properties properties = new Properties();
+    if (file == null){
+      return properties;
+    }
     FileInputStream in;
     try {
       in = new FileInputStream(file);

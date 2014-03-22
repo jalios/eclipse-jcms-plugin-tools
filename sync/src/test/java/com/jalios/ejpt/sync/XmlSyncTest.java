@@ -368,7 +368,7 @@ public class XmlSyncTest extends TestUtil {
 
     SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
-        webappProjectDirectory).build();
+        tmpWebappProjectTestDirectory).configuration(null).build();
     try {
       SyncStrategyReport report = strategy.run(configuration);
       assertEquals(report.getSyncFilesUnknown().size(), 2);
@@ -406,5 +406,7 @@ public class XmlSyncTest extends TestUtil {
       e.printStackTrace();
     }
   }
+  
+  
 
 }
