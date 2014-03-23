@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
+import com.jalios.ejpt.sync.utils.IOUtil;
 
 /**
  * 
@@ -33,7 +34,7 @@ public class CopyExecutor implements SyncExecutor {
     syncFiles.addAll(report.getSyncFilesToWebapp());
     for (FileSyncStatus syncFile : syncFiles) {
       try {
-        SyncUtil.copyFile(syncFile.getSource(), syncFile.getDestination());
+        IOUtil.copyFile(syncFile.getSource(), syncFile.getDestination());
       } catch (IOException e) {
         e.printStackTrace();
       }

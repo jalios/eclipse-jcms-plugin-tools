@@ -1,6 +1,6 @@
 package com.jalios.ejpt.parser;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jalios.ejpt.TestUtil;
-import com.jalios.ejpt.sync.SyncUtil;
+import com.jalios.ejpt.sync.utils.IOUtil;
 
 public class ParserTest extends TestUtil {
 
@@ -21,7 +21,7 @@ public class ParserTest extends TestUtil {
 
   @Before
   public void setUp() {
-    tmpWebappProjectTestDirectory = SyncUtil.createTempDir();
+    tmpWebappProjectTestDirectory = IOUtil.createTempDir();
     webappProjectDirectory = new File(tmpWebappProjectTestDirectory, "webappproject");
     webappProjectDirectory.mkdirs();
     createDirectoryForParsing();
@@ -76,7 +76,7 @@ public class ParserTest extends TestUtil {
       new File(webappProjectDirectory, "edit.jsp").createNewFile();
       new File(webappProjectDirectory, "index.jsp").createNewFile();
 
-      FileUtils.copyFile(getFileFromResource("plugin-java-package.xml"), new File(webappProjectDirectory,
+      FileUtils.copyFile(getFileFromResource("plugin-jx.xml"), new File(webappProjectDirectory,
           "WEB-INF/plugins/TestPlugin/plugin.xml"));
       FileUtils.copyFile(getFileFromResource("jcms-plugin-1.6.dtd"), new File(webappProjectDirectory,
           "WEB-INF/jalios/jcms-plugin-1.6.dtd"));
@@ -87,10 +87,15 @@ public class ParserTest extends TestUtil {
 
   @Test
   public void loadPluginXML() {
-    // init a jcms structure with a plugin
-    ParsePlugin parser = ParsePlugin.getParser();
-    PluginJCMS testPlugin = parser.analyze(webappProjectDirectory);
-    assertNotNull(testPlugin);
+    ParseService parser = (ParseService) context.getBean("parseJcmsPluginXml");
+    try {
+      long start = System.currentTimeMillis();
+      ParseInfo testPlugin = parser.parse(webappProjectDirectory);
+      System.out.println("Parsing a plugin.xml file took : " + (System.currentTimeMillis() - start) + " ms");
+      assertNotNull(testPlugin);
+    } catch (ParseException e) {
+      fail(e.getMessage());
+    }
   }
 
 }

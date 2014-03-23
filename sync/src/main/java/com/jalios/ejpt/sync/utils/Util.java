@@ -1,16 +1,32 @@
+/*
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License
+ */
 package com.jalios.ejpt.sync.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+/**
+ *  
+ * @author Xuan Tuong LE (lxuong@gmail.com)
+ */
 public class Util {
   public static boolean isEmpty(Collection<?> collection) {
     return collection == null || collection.size() == 0;
@@ -50,34 +66,13 @@ public class Util {
     return list;
   }
 
-  public static boolean isFileNameFoundInFiles(List<File> files, String fileName) {
+  public static File findByFileName(List<File> files, String fileName) throws FileNotFoundException{
     for (File itFile : files) {
       if (itFile.getName().equals(fileName)) {
-        return true;
+        return itFile;
       }
     }
-    return false;
-  }
-
-  /**
-   * Maths talk : C1 \ (C1 intersection C2)
-   * 
-   * @param firstCollection
-   * @param secondCollection
-   * @return
-   */
-  public static <T> Collection<T> getElementsNotFoundInSecondCollection(Collection<T> firstCollection,
-      Collection<T> secondCollection) {
-    List<T> collection = new ArrayList<T>();
-
-    for (T element : firstCollection) {
-      if (secondCollection.contains(element)) {
-        continue;
-      }
-      collection.add(element);
-    }
-
-    return collection;
+    throw new FileNotFoundException("The file name " + fileName + " doesn't exist");
   }
 
   public static Properties loadProperties(File file) {

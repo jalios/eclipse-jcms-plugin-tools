@@ -9,8 +9,12 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import com.jalios.ejpt.TestUtil;
+import com.jalios.ejpt.sync.utils.BlackListFilter;
+import com.jalios.ejpt.sync.utils.IOUtil;
 
 public class BlackListFilterTest extends TestUtil{
   private File tmpWebappProjectTestDirectory;
@@ -19,7 +23,7 @@ public class BlackListFilterTest extends TestUtil{
 
   @Before
   public void setUp() {
-    tmpWebappProjectTestDirectory = SyncUtil.createTempDir();
+    tmpWebappProjectTestDirectory = IOUtil.createTempDir();
     webappProjectDirectory = new File(tmpWebappProjectTestDirectory, "webappproject");
     webappProjectDirectory.mkdirs();
     createDummyDirectory();
@@ -68,7 +72,7 @@ public class BlackListFilterTest extends TestUtil{
     // init a jcms structure with a plugin
     BlackListFilter filter = new BlackListFilter.Builder().build();
     List<File> files = new LinkedList<>();
-    for (File itFile : SyncUtil.deepListFiles(webappProjectDirectory, filter)){     
+    for (File itFile : IOUtil.deepListFiles(webappProjectDirectory, filter)){     
       files.add(itFile);
     }
     

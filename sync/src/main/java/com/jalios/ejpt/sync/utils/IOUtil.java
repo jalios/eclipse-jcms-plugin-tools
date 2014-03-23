@@ -11,28 +11,35 @@
  the terms and conditions of version 3 of the GNU General Public
  License
  */
-package com.jalios.ejpt.sync;
+package com.jalios.ejpt.sync.utils;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.log4j.Logger;
+
+import com.jalios.ejpt.parser.ParseConstants;
 
 /**
  * Util for sync
  * 
  * @author Xuan Tuong LE (lxuong@gmail.com)
  */
-public class SyncUtil {
-  private static final Logger logger = Logger.getLogger(SyncUtil.class);
+public class IOUtil {
+  private static final Logger logger = Logger.getLogger(IOUtil.class);
 
   /**
    * List the first level of a directory
@@ -254,10 +261,22 @@ public class SyncUtil {
       logger.warn("Cannot delete file " + file);
     }
   }
-  
+
   public static File getDestinationFile(File destinationDirectory, File sourceDirectory, File file) {
     String fileRelativePath = getRelativePath(sourceDirectory, file);
     return new File(destinationDirectory, fileRelativePath);
   }
-  
+
+  public static File findPluginXMLFile(File directory) throws FileNotFoundException {
+    Collection<File> files = FileUtils.listFiles(directory, FileFilterUtils.nameFileFilter(ParseConstants.PLUGIN_XML),
+        TrueFileFilter.INSTANCE);
+
+    if (!files.isEmpty() && files.size() == 1) {
+      return files.iterator().next();
+    }
+
+    throw new FileNotFoundException("'plugin.xml' not found in " + directory);
+
+  }
+
 }

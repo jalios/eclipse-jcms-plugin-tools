@@ -1,3 +1,16 @@
+/*
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License
+ */
 package com.jalios.ejpt.parser;
 
 import java.io.File;
@@ -13,17 +26,20 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.xml.sax.EntityResolver;
 
-import com.jalios.ejpt.sync.BlackListFilter;
+import com.jalios.ejpt.sync.utils.BlackListFilter;
 import com.jalios.ejpt.sync.utils.Util;
-
+/**
+ * 
+ * @author Xuan Tuong LE - lxtuong@gmail.com
+ *
+ */
 public class ParseUtil {
 
-  public static Document getDomStructure(File file, EntityResolver entityResolver) {
+  public static Document getDomStructure(File file) {
     try {
       InputStream inputStream = new FileInputStream(file);
-      SAXBuilder builder = getSAXBuilder(entityResolver);
+      SAXBuilder builder = getSAXBuilderWithInternalResolver();
       Document document = builder.build(inputStream);
       return document;
     } catch (IOException ex) {
@@ -79,10 +95,10 @@ public class ParseUtil {
     }
   }
 
-  private static SAXBuilder getSAXBuilder(EntityResolver entityResolver) {
+  private static SAXBuilder getSAXBuilderWithInternalResolver() {
     SAXBuilder builder = new SAXBuilder(SAXParser.class.getName(), false);
     builder.setValidation(true);
-    builder.setEntityResolver(entityResolver);
+    builder.setEntityResolver(new InternalEntityResolver());
     return builder;
   }
 

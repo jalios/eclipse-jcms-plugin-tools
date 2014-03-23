@@ -16,6 +16,8 @@ package com.jalios.ejpt.sync;
 import java.io.File;
 import java.io.FileFilter;
 
+import com.jalios.ejpt.sync.utils.BlackListFilter;
+
 /**
  * @author Xuan Tuong LE - lxtuong@gmail.com
  *

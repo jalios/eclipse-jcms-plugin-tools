@@ -11,13 +11,17 @@
  the terms and conditions of version 3 of the GNU General Public
  License
  */
-package com.jalios.ejpt.sync;
+package com.jalios.ejpt.parser;
 
 /**
  * 
  * @author Xuan Tuong LE - lxtuong@gmail.com
- *
+ * 
  */
-public interface SyncExecutor {
-  public void run(SyncStrategyReport report);
+public class ParseException extends Exception {
+  private static final long serialVersionUID = 6325569199321822020L;
+
+  public ParseException(String message) {
+    super(message);
+  }
 }

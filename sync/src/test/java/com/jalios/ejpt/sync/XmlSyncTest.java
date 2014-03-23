@@ -17,6 +17,7 @@ import com.jalios.ejpt.sync.filesyncstatus.FileModified;
 import com.jalios.ejpt.sync.filesyncstatus.FileNotFoundOnDisk;
 import com.jalios.ejpt.sync.filesyncstatus.FileShouldDeclare;
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
+import com.jalios.ejpt.sync.utils.IOUtil;
 
 public class XmlSyncTest extends TestUtil {
   private File tmpWebappProjectTestDirectory;
@@ -27,11 +28,11 @@ public class XmlSyncTest extends TestUtil {
 
   @Before
   public void setUp() {
-    tmpWebappProjectTestDirectory = SyncUtil.createTempDir();
+    tmpWebappProjectTestDirectory = IOUtil.createTempDir();
     webappProjectDirectory = new File(tmpWebappProjectTestDirectory, "webappproject");
     webappProjectDirectory.mkdirs();
     createLightJcmsProjectStructure();
-    tmpPluginProjectTestDirectory = SyncUtil.createTempDir();
+    tmpPluginProjectTestDirectory = IOUtil.createTempDir();
     pluginProjectDirectory = new File(tmpPluginProjectTestDirectory, "TestPluginRoot");
     pluginProjectDirectory.mkdirs();
     createLightPluginProjectStructure();
@@ -134,8 +135,9 @@ public class XmlSyncTest extends TestUtil {
       report.run(new CopyExecutor());
       assertEquals(report.countSyncFilesToWebapp(), 16);
       assertEquals(report.countSyncFilesToPlugin(), 0);
-
+      
       report = strategy.run(configuration);
+      
       assertEquals(report.countSyncFilesToWebapp(), 0);
       assertEquals(report.countSyncFilesToPlugin(), 0);
 

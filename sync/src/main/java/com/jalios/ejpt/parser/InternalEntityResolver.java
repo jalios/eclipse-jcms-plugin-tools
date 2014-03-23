@@ -1,3 +1,16 @@
+/*
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License
+ */
 package com.jalios.ejpt.parser;
 
 import java.io.IOException;
@@ -7,8 +20,12 @@ import java.util.HashMap;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-public class InternalEntityResolver implements EntityResolver {
+/**
+ * 
+ * @author Xuan Tuong LE - lxtuong@gmail.com
+ *
+ */
+class InternalEntityResolver implements EntityResolver {
   private final HashMap<String, String> dtdMap = new HashMap<String, String>();
 
   public InternalEntityResolver() {
@@ -24,14 +41,14 @@ public class InternalEntityResolver implements EntityResolver {
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
     String filename = dtdMap.get(publicId);
     if (filename == null) {
-      return null;
+      throw new IOException("Unknown dtd specification : " + publicId);
     }
-    
+
     InputStream is = this.getClass().getResourceAsStream("/" + filename);
-    if (is == null){
-      System.out.println("error : cannot find dtd " + filename);
-      return null;
+    if (is == null) {
+      throw new IOException("internal DTD file not found with filename " + filename);
     }
+
     return new InputSource(is);
   }
 }

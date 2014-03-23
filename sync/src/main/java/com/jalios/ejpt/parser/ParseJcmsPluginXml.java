@@ -1,3 +1,16 @@
+/*
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License
+ */
 package com.jalios.ejpt.parser;
 
 import static com.jalios.ejpt.parser.ParseConstants.FILE_INDEX_LISTENER;
@@ -18,9 +31,12 @@ import static com.jalios.ejpt.parser.ParseConstants.XML_WEBAPP;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,40 +45,46 @@ import java.util.TreeSet;
 
 import org.jdom.Document;
 import org.jdom.Element;
-import org.xml.sax.EntityResolver;
 
+import com.jalios.ejpt.sync.utils.IOUtil;
 import com.jalios.ejpt.sync.utils.Util;
 
-public final class ParsePlugin {
-
-  private static final ParsePlugin SINGLETON = new ParsePlugin();
+/**
+ * 
+ * @author Xuan Tuong LE - lxtuong@gmail.com
+ * 
+ */
+public final class ParseJcmsPluginXml implements ParseService {
   private String name = null;
   private File rootDirectory;
   // Internal
-  protected Document domStructure = null;
+  private Document domStructure = null;
+  private Set<String> fileSet = Collections.synchronizedSet(new HashSet<String>());
 
-  private ParsePlugin() {
+  public ParseInfo parse(File directory) throws ParseException {
+    try {
+      return internalParse(directory);
+    } catch (FileNotFoundException exception) {
+      throw new ParseException(exception.getMessage());
+    }
   }
 
-  public static ParsePlugin getParser() {
-    return SINGLETON;
-  }
+  private ParseInfo internalParse(File directory) throws FileNotFoundException {
+    rootDirectory = directory;
+    ParseInfo parseInfo = new ParseInfo();
 
-  public PluginJCMS analyze(File directory) {
-    this.rootDirectory = directory;
-    File pluginFile = new File(ParseUtil.getPrivatePluginDirectory(directory), "/" + PLUGIN_XML);
-    if (!pluginFile.exists()) {
-      return null;
+    File pluginFile = IOUtil.findPluginXMLFile(directory);
+    domStructure = ParseUtil.getDomStructure(pluginFile);
+    Element root = domStructure.getRootElement();
+    name = root.getAttributeValue("name");
+    parseInfo.setPluginName(name);
+
+    if (domStructure == null) {
+      return parseInfo;
     }
 
-    EntityResolver resolver = new InternalEntityResolver();
-    this.domStructure = ParseUtil.getDomStructure(pluginFile, resolver);
-    Element root = this.domStructure.getRootElement();
-    this.name = root.getAttributeValue("name");
-
-    PluginJCMS plugin = new PluginJCMS();
-    plugin.setFilesPath(getAllFiles(true, false));
-    return plugin;
+    parseInfo.setFilesPath(getAllFiles(true, false));
+    return parseInfo;
   }
 
   /**
@@ -103,15 +125,7 @@ public final class ParsePlugin {
     // Adding workflow
     set.addAll(getWorkflowsPath());
 
-    // Adding jars
-    set.addAll(getJarsPath());
-
-    // Adding java
-    set.addAll(getJavaPath(sources));
-
-    // Adding Hibernate mappings
-    set.addAll(getHibernateMappingsPath());
-
+    
     // Adding component
     Map<String, String> itemMap = getPluginComponentPath(sources);
     if (itemMap != null) {
@@ -124,123 +138,110 @@ public final class ParsePlugin {
       set.addAll(itemMap.keySet());
     }
 
-    // Adding private files
-    set.addAll(getPrivatesPath());
+    List<Runnable> threads = new LinkedList<Runnable>();
+    threads.add(new CheckJavaPathThread());
+    threads.add(new CheckJarsPathThread());
+    threads.add(new CheckPrivatesPathThread());
+    threads.add(new CheckPublicsPathThread());
+    threads.add(new CheckWebappsPathThread());
+    threads.add(new CheckHibernateMappingsPathThread());
 
-    // Adding public files
-    set.addAll(getPublicsPath());
-
-    // Adding webapp files
-    set.addAll(getWebappsPath());
+    for (Runnable thread : threads){
+      thread.run();
+    }
+    
+    synchronized (fileSet) {
+      set.addAll(fileSet);
+    }
 
     return set;
   }
 
-  /**
-   * Returns a Set of path to plugin's jars.
-   * 
-   * @return Set of path
-   */
-  private Set<String> getJarsPath() {
+  private class CheckJarsPathThread implements Runnable {
 
-    Set<String> jarsPath = new TreeSet<String>();
+    @Override
+    public void run() {
+      Set<String> jarsPath = new TreeSet<String>();
 
-    if (domStructure == null) {
-      return jarsPath;
-    }
-
-    Element root = domStructure.getRootElement();
-    Element jars = root.getChild("jars");
-    if (jars == null) {
-      return jarsPath;
-    }
-
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> jarList = jars.getChildren("jar");
-    if (jarList == null || jarList.size() == 0) {
-      return jarsPath;
-    }
-
-    for (Element itJar : jarList) {
-      String itPath = itJar.getAttributeValue("path");
-      if (itPath == null) {
-        continue;
+      Element root = domStructure.getRootElement();
+      Element jars = root.getChild("jars");
+      if (jars == null) {
+        return;
       }
-      jarsPath.add("WEB-INF/lib/" + itPath);
-    }
-    return jarsPath;
-  }
 
-  /**
-   * Returns a Set of path to plugin's java files.
-   * 
-   * @param sources
-   *          boolean true to include java files
-   * @return Set of path
-   */
-  private Set<String> getJavaPath(boolean sources) {
-    Set<String> javaPaths = new TreeSet<String>();
-
-    if (domStructure == null) {
-      return javaPaths;
-    }
-
-    Element root = domStructure.getRootElement();
-    Element javaClasses = root.getChild("java-classes");
-    if (javaClasses == null) {
-      return javaPaths;
-    }
-
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> javaClassesPath = javaClasses.getChildren("java");
-    if (javaClassesPath == null || javaClassesPath.size() == 0) {
-      return javaPaths;
-    }
-
-    for (Element itJava : javaClassesPath) {
-      fillJavaSet(itJava, javaPaths, sources);
-    }
-    
-    return javaPaths;
-  }
-
-  /**
-   * Returns a Set of path to plugin's Hibernate mappings (hbm).
-   * 
-   * @return Set of path
-   */
-  private Set<String> getHibernateMappingsPath() {
-
-    TreeSet<String> pathSet = new TreeSet<String>();
-
-    if (domStructure == null) {
-      return pathSet;
-    }
-
-    Element root = domStructure.getRootElement();
-    Element hibernate = root.getChild("hibernate");
-    if (hibernate == null) {
-      return pathSet;
-    }
-
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> mappingList = hibernate.getChildren("mapping");
-    if (mappingList == null || mappingList.size() == 0) {
-      return pathSet;
-    }
-
-    for (Element mapping : mappingList) {
-      String resource = mapping.getAttributeValue("resource");
-      if (resource == null) {
-        continue;
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> jarList = jars.getChildren("jar");
+      if (jarList == null || jarList.size() == 0) {
+        return;
       }
-      pathSet.add("WEB-INF/classes/" + resource);
+
+      for (Element itJar : jarList) {
+        String itPath = itJar.getAttributeValue("path");
+        if (itPath == null) {
+          continue;
+        }
+        jarsPath.add("WEB-INF/lib/" + itPath);
+      }
+      fileSet.addAll(jarsPath);
     }
-    return pathSet;
+
   }
+  
+  private class CheckJavaPathThread implements Runnable {
+
+    @Override
+    public void run() {
+      Set<String> javaPaths = new TreeSet<String>();
+
+      Element root = domStructure.getRootElement();
+      Element javaClasses = root.getChild("java-classes");
+      if (javaClasses == null) {
+        return;
+      }
+
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> javaClassesPath = javaClasses.getChildren("java");
+      if (javaClassesPath == null || javaClassesPath.size() == 0) {
+        return;
+      }
+
+      for (Element itJava : javaClassesPath) {
+        fillJavaSet(itJava, javaPaths, true);
+      }
+      fileSet.addAll(javaPaths);
+    }
+
+  }
+  
+  private class CheckHibernateMappingsPathThread implements Runnable {
+
+    @Override
+    public void run() {
+      Element root = domStructure.getRootElement();
+      Element hibernate = root.getChild("hibernate");
+      if (hibernate == null) {
+        return;
+      }
+
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> mappingList = hibernate.getChildren("mapping");
+      if (mappingList == null || mappingList.size() == 0) {
+        return;
+      }
+
+      for (Element mapping : mappingList) {
+        String resource = mapping.getAttributeValue("resource");
+        if (resource == null) {
+          continue;
+        }
+        fileSet.add("WEB-INF/classes/" + resource);
+      }      
+    }
+
+  }  
 
   /**
    * Returns a Set of path to plugin's workflow.
@@ -430,79 +431,73 @@ public final class ParsePlugin {
     return tteSet;
   }
 
-  /**
-   * Returns a Set of path to plugin's public files.
-   * 
-   * @return Set of path
-   */
-  private Set<String> getPublicsPath() {
-    Set<String> set = new TreeSet<String>();
+  private class CheckPublicsPathThread implements Runnable {
 
-    if (domStructure == null) {
-      return set;
+    @Override
+    public void run() {
+      Set<String> set = new TreeSet<String>();
+
+      Element root = domStructure.getRootElement();
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> publicChildren1 = root.getChildren(XML_PUBLIC);
+      ParseUtil.fillElementPath(set, publicChildren1, PLUGIN_PUBLIC_PATH + "/" + name + "/", "file", true, null, null);
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> publicChildren2 = root.getChildren(XML_PUBLIC);
+      ParseUtil.fillElementPath(set, publicChildren2, PLUGIN_PUBLIC_PATH + "/" + name + "/", "directory", true, null,
+          null);
+
+      fileSet.addAll(set);
     }
 
-    Element root = domStructure.getRootElement();
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> publicChildren1 = root.getChildren(XML_PUBLIC);
-    ParseUtil.fillElementPath(set, publicChildren1, PLUGIN_PUBLIC_PATH + "/" + name + "/", "file", true, null, null);
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> publicChildren2 = root.getChildren(XML_PUBLIC);
-    ParseUtil.fillElementPath(set, publicChildren2, PLUGIN_PUBLIC_PATH + "/" + name + "/", "directory", true, null,
-        null);
-
-    return set;
   }
 
-  /**
-   * Returns a Set of path to plugin's private files.
-   * 
-   * @return Set of path
-   */
-  private Set<String> getPrivatesPath() {
-    Set<String> set = new TreeSet<String>();
+  private class CheckWebappsPathThread implements Runnable {
 
-    if (domStructure == null) {
-      return set;
+    @Override
+    public void run() {
+      Set<String> set = new TreeSet<String>();
+
+      if (domStructure == null) {
+        return;
+      }
+
+      Element root = domStructure.getRootElement();
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> webappChildren1 = root.getChildren(XML_WEBAPP);
+      ParseUtil.fillElementPath(set, webappChildren1, "", "file", true, null, null);
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> webappChildren2 = root.getChildren(XML_WEBAPP);
+      ParseUtil.fillElementPath(set, webappChildren2, "", "directory", true, null, null);
+      fileSet.addAll(set);
     }
 
-    Element root = domStructure.getRootElement();
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> privateChildren1 = root.getChildren(XML_PRIVATE);
-    ParseUtil.fillElementPath(set, privateChildren1, PLUGIN_PRIVATE_PATH + "/" + name + "/", "file", true, null, null);
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> privateChildren2 = root.getChildren(XML_PRIVATE);
-    ParseUtil.fillElementPath(set, privateChildren2, PLUGIN_PRIVATE_PATH + "/" + name + "/", "directory", true, null,
-        null);
-    return set;
   }
 
-  /**
-   * Returns a Set of path to plugin's webapps files.
-   * 
-   * @return Set of path
-   */
-  private Set<String> getWebappsPath() {
-    Set<String> set = new TreeSet<String>();
+  private class CheckPrivatesPathThread implements Runnable {
 
-    if (domStructure == null) {
-      return set;
+    @Override
+    public void run() {
+      Set<String> set = new TreeSet<String>();
+
+      Element root = domStructure.getRootElement();
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> privateChildren1 = root.getChildren(XML_PRIVATE);
+      ParseUtil
+          .fillElementPath(set, privateChildren1, PLUGIN_PRIVATE_PATH + "/" + name + "/", "file", true, null, null);
+      @SuppressWarnings("unchecked")
+      // JDOM generics
+      List<Element> privateChildren2 = root.getChildren(XML_PRIVATE);
+      ParseUtil.fillElementPath(set, privateChildren2, PLUGIN_PRIVATE_PATH + "/" + name + "/", "directory", true, null,
+          null);
+
+      fileSet.addAll(set);
     }
 
-    Element root = domStructure.getRootElement();
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> webappChildren1 = root.getChildren(XML_WEBAPP);
-    ParseUtil.fillElementPath(set, webappChildren1, "", "file", true, null, null);
-    @SuppressWarnings("unchecked")
-    // JDOM generics
-    List<Element> webappChildren2 = root.getChildren(XML_WEBAPP);
-    ParseUtil.fillElementPath(set, webappChildren2, "", "directory", true, null, null);
-    return set;
   }
 
   private void fillPluginComponentPath(Map<String, String> itemMap, String tagName, boolean sources) {
@@ -615,7 +610,7 @@ public final class ParsePlugin {
     if (itClass != null) {
       pathSet.addAll(getClassFiles(itClass));
       return;
-    }    
+    }
 
     String itPackage = itJava.getAttributeValue("package");
     // Check attribute package
@@ -635,7 +630,7 @@ public final class ParsePlugin {
 
   private Set<String> getPackageClassFiles(File realPath, String fullPackage, boolean sources) {
     String packagePath = fullPackage.replace('.', '/');
-    File packageFolder = new File(realPath,"/WEB-INF/classes/" + packagePath);
+    File packageFolder = new File(realPath, "/WEB-INF/classes/" + packagePath);
 
     Set<String> pathSet = new HashSet<String>(5);
 
