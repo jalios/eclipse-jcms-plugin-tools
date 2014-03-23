@@ -5,8 +5,5 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<bean id="parseJcmsPluginXml" class="com.jalios.ejpt.parser.ParseJcmsPluginXml">
 	</bean>
 	<bean id="xmlStrategy" class="com.jalios.ejpt.sync.XmlSyncStrategy">
-		<property name="parseService">
-			<ref bean="parseJcmsPluginXml" />
-		</property>
 	</bean>
 </beans>

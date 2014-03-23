@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.jalios.ejpt.parser.ParseException;
 import com.jalios.ejpt.parser.ParseInfo;
+import com.jalios.ejpt.parser.ParseJcmsPluginXml;
 import com.jalios.ejpt.parser.ParseService;
 import com.jalios.ejpt.parser.ParseUtil;
 import com.jalios.ejpt.sync.filesyncstatus.FileAdded;
@@ -22,12 +23,6 @@ public class XmlSyncStrategy implements SyncStrategy {
   // global info for different internal strategies
   private FileFilter fileFilter;
   private List<File> pluginXmlDeclaredFiles;
-  
-  private ParseService parseService;
-  
-  public void setParseService(ParseService parseService) {
-    this.parseService = parseService;
-  }
 
   private void cacheInfo(SyncStrategyConfiguration configuration) {
     fileFilter = configuration.getFileFilter();
@@ -79,7 +74,7 @@ public class XmlSyncStrategy implements SyncStrategy {
     public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException {
       SyncStrategyReport report = new SyncStrategyReport();
       File privatePluginDirectory = ParseUtil.getPrivatePluginDirectory(configuration.getPluginProjectDirectory());
-      if (privatePluginDirectory == null){
+      if (privatePluginDirectory == null) {
         return report;
       }
       File pluginPublicDirectory = new File(configuration.getWebappProjectDirectory(), "/plugins/"
@@ -92,10 +87,10 @@ public class XmlSyncStrategy implements SyncStrategy {
       List<File> webappFilesByPluginXml = getPluginXmlDeclaredFiles(configuration.getWebappProjectDirectory());
 
       for (File declareWebappFile : webappFilesByPluginXml) {
-        if (!declareWebappFile.exists()){
+        if (!declareWebappFile.exists()) {
           continue;
         }
-        
+
         File destinationFile = IOUtil.getDestinationFile(configuration.getPluginProjectDirectory(),
             configuration.getWebappProjectDirectory(), declareWebappFile);
 
@@ -163,27 +158,26 @@ public class XmlSyncStrategy implements SyncStrategy {
    */
   private List<File> getPluginXmlDeclaredFiles(File directory) {
     // check status from plugin.xml
-    ParseInfo info;
+    ParseService parser = new ParseJcmsPluginXml();
+    ParseInfo info = new ParseInfo();
     try {
-      info = parseService.parse(directory);
+      info = parser.parse(directory);
     } catch (ParseException e) {
-      // TODO : logger.warn
-      return new LinkedList<File>();
+      e.printStackTrace();
     }
 
     List<File> files = new LinkedList<File>();
 
-    if (info != null) {
-      for (String declaredFilePath : info.getFilesPath()) {
-        File declaredFile = new File(directory, declaredFilePath);
-        if (declaredFile.isDirectory()) {
-          files.addAll(IOUtil.deepListFiles(declaredFile, fileFilter));
-          continue;
-        }
-
-        files.add(new File(directory, declaredFilePath));
+    for (String declaredFilePath : info.getFilesPath()) {
+      File declaredFile = new File(directory, declaredFilePath);
+      if (declaredFile.isDirectory()) {
+        files.addAll(IOUtil.deepListFiles(declaredFile, fileFilter));
+        continue;
       }
-    }    
+
+      files.add(new File(directory, declaredFilePath));
+    }
+
     return files;
   }
 

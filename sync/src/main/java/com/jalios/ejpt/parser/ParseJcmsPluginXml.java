@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -55,6 +56,8 @@ import com.jalios.ejpt.sync.utils.Util;
  * 
  */
 public final class ParseJcmsPluginXml implements ParseService {
+  private static final Logger logger = Logger.getLogger(ParseJcmsPluginXml.class);
+
   private String name = null;
   private File rootDirectory;
   // Internal
@@ -62,18 +65,21 @@ public final class ParseJcmsPluginXml implements ParseService {
   private Set<String> fileSet = Collections.synchronizedSet(new HashSet<String>());
 
   public ParseInfo parse(File directory) throws ParseException {
+    rootDirectory = directory;
+    File pluginFile;
     try {
-      return internalParse(directory);
+      pluginFile = IOUtil.findPluginXMLFile(directory);
     } catch (FileNotFoundException exception) {
+      logger.error(exception.getMessage());
       throw new ParseException(exception.getMessage());
     }
+    return internalParse(pluginFile);
+
   }
 
-  private ParseInfo internalParse(File directory) throws FileNotFoundException {
-    rootDirectory = directory;
+  private ParseInfo internalParse(File pluginFile){
     ParseInfo parseInfo = new ParseInfo();
 
-    File pluginFile = IOUtil.findPluginXMLFile(directory);
     domStructure = ParseUtil.getDomStructure(pluginFile);
     Element root = domStructure.getRootElement();
     name = root.getAttributeValue("name");

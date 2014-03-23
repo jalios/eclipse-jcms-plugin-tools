@@ -135,9 +135,9 @@ public class XmlSyncTest extends TestUtil {
       report.run(new CopyExecutor());
       assertEquals(report.countSyncFilesToWebapp(), 16);
       assertEquals(report.countSyncFilesToPlugin(), 0);
-      
+
       report = strategy.run(configuration);
-      
+
       assertEquals(report.countSyncFilesToWebapp(), 0);
       assertEquals(report.countSyncFilesToPlugin(), 0);
 
@@ -187,12 +187,13 @@ public class XmlSyncTest extends TestUtil {
       } catch (IOException e) {
         fail(e.getMessage());
       }
-      report = strategy.run(configuration);      
+      report = strategy.run(configuration);
       assertEquals(report.countSyncFilesToPlugin(), 1);
 
       FileSyncStatus ss = report.getSyncFilesToPlugin().iterator().next();
       assertTrue(ss instanceof FileAdded);
-      assertTrue(ss.getDestination().equals(FileUtils.getFile(pluginProjectDirectory, "plugins/TestPlugin/jsp/new-jsp.jsp")));
+      assertTrue(ss.getDestination().equals(
+          FileUtils.getFile(pluginProjectDirectory, "plugins/TestPlugin/jsp/new-jsp.jsp")));
 
     } catch (SyncStrategyException e) {
       e.printStackTrace();
@@ -408,7 +409,5 @@ public class XmlSyncTest extends TestUtil {
       e.printStackTrace();
     }
   }
-  
-  
 
 }

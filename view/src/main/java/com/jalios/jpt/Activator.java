@@ -34,6 +34,7 @@ public class Activator extends AbstractUIPlugin {
    * The constructor
    */
   public Activator() {
+    
   }
 
   /*
@@ -44,8 +45,9 @@ public class Activator extends AbstractUIPlugin {
    * )
    */
   public void start(BundleContext context) throws Exception {
-    super.start(context);
+    super.start(context);    
     plugin = this;
+   
   }
 
   /*

@@ -3,6 +3,7 @@ package com.jalios.ejpt.parser;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
@@ -89,13 +90,23 @@ public class ParserTest extends TestUtil {
   public void loadPluginXML() {
     ParseService parser = (ParseService) context.getBean("parseJcmsPluginXml");
     try {
-      long start = System.currentTimeMillis();
       ParseInfo testPlugin = parser.parse(webappProjectDirectory);
-      System.out.println("Parsing a plugin.xml file took : " + (System.currentTimeMillis() - start) + " ms");
       assertNotNull(testPlugin);
     } catch (ParseException e) {
       fail(e.getMessage());
     }
+  }
+  
+  @Test
+  public void findPluginXML() {
+    try {
+      File file = IOUtil.findPluginXMLFile(new File(webappProjectDirectory, "WEB-INF/plugins"));
+      assertNotNull(file);
+      assertNotNull(file.getName().equals("plugin.xml"));
+    } catch (FileNotFoundException e) {
+      fail(e.getMessage());
+    }
+    
   }
 
 }

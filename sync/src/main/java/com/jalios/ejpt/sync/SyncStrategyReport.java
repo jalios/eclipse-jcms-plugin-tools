@@ -80,16 +80,16 @@ public final class SyncStrategyReport {
   public String toString() {
     StringBuilder str = new StringBuilder();
     for (FileSyncStatus sf : map.get(Direction.TO_WEBAPP)) {
-      str.append("P->W : " + sf.getDestination().getAbsolutePath()).append("\n");
+      str.append(sf.getStatusName() + " P->W : " + sf.getDestination().getAbsolutePath()).append("\n");
     }
 
     for (FileSyncStatus sf : map.get(Direction.TO_PLUGIN)) {
-      str.append("W->P : " + sf.getDestination().getAbsolutePath()).append("\n");
+      str.append(sf.getStatusName() + " W->P : " + sf.getDestination().getAbsolutePath()).append("\n");
     }
     
 
     for (FileSyncStatus sf : map.get(Direction.UNKNOWN)) {
-      str.append("?->? : " + sf.getDestination().getAbsolutePath()).append("\n");
+      str.append(sf.getStatusName() + " ?->? : " + sf.getDestination().getAbsolutePath()).append("\n");
     }
     return str.toString();
   }

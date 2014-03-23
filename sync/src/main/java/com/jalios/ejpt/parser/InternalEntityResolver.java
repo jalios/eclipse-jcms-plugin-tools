@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -26,6 +27,7 @@ import org.xml.sax.SAXException;
  *
  */
 class InternalEntityResolver implements EntityResolver {
+  private static final Logger logger = Logger.getLogger(InternalEntityResolver.class);
   private final HashMap<String, String> dtdMap = new HashMap<String, String>();
 
   public InternalEntityResolver() {
@@ -41,12 +43,16 @@ class InternalEntityResolver implements EntityResolver {
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
     String filename = dtdMap.get(publicId);
     if (filename == null) {
-      throw new IOException("Unknown dtd specification : " + publicId);
+      String message = "Unknown dtd specification : " + publicId;
+      logger.error(message);
+      throw new SAXException(message);
     }
 
     InputStream is = this.getClass().getResourceAsStream("/" + filename);
     if (is == null) {
-      throw new IOException("internal DTD file not found with filename " + filename);
+      String message = "Internal DTD file not found with filename " + filename;
+      logger.error(message);
+      throw new SAXException(message);
     }
 
     return new InputSource(is);

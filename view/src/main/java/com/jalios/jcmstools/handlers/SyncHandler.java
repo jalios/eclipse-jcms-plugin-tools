@@ -14,6 +14,7 @@
 package com.jalios.jcmstools.handlers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
@@ -24,6 +25,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import com.jalios.ejpt.sync.SyncStrategyConfiguration;
 import com.jalios.ejpt.sync.SyncStrategyException;
 import com.jalios.ejpt.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.utils.IOUtil;
 import com.jalios.jcmstools.transversal.EJPTUtil;
 
 /**
@@ -92,6 +94,7 @@ public class SyncHandler extends AbstractHandler {
               + "or check your plugin project nature by using <nature>com.jalios.jpt.natures.jcmspluginnature</nature> in .project. "
               + "Operation aborted");
     }
+    
 
     webappProject = EJPTUtil.getJcmsWebappProject(pluginProject);
 
@@ -103,6 +106,14 @@ public class SyncHandler extends AbstractHandler {
     // init configuration and sync context
     File config = EJPTUtil.getSyncConfigurationFilePath(webappProject);
     File ppPath = pluginProject.getLocation().toFile();
+    
+    try {
+      IOUtil.findPluginXMLFile(ppPath);
+    } catch (FileNotFoundException e) {
+      throw new InitSyncContextException(e.getMessage());
+    }
+
+    
     File wpPath = new File(EJPTUtil.getWebappDirectoryPath(webappProject));
     configuration = new SyncStrategyConfiguration.Builder(ppPath, wpPath).configuration(config).build();
   }

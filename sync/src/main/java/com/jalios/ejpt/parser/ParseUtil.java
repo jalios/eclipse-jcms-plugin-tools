@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.SAXParser;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -29,12 +30,14 @@ import org.jdom.input.SAXBuilder;
 
 import com.jalios.ejpt.sync.utils.BlackListFilter;
 import com.jalios.ejpt.sync.utils.Util;
+
 /**
  * 
  * @author Xuan Tuong LE - lxtuong@gmail.com
- *
+ * 
  */
 public class ParseUtil {
+  private static final Logger logger = Logger.getLogger(ParseJcmsPluginXml.class);
 
   public static Document getDomStructure(File file) {
     try {
@@ -43,11 +46,11 @@ public class ParseUtil {
       Document document = builder.build(inputStream);
       return document;
     } catch (IOException ex) {
-      ex.printStackTrace();
+      logger.error(ex.getMessage());
     } catch (JDOMException ex) {
-      ex.printStackTrace();
+      logger.error(ex.getMessage());
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error(ex.getMessage());
     }
     return null;
   }
@@ -101,8 +104,6 @@ public class ParseUtil {
     builder.setEntityResolver(new InternalEntityResolver());
     return builder;
   }
-
-  
 
   public static File getPrivatePluginDirectory(File pluginDirectory) {
     File rootDirectoryPlugins = new File(pluginDirectory, "WEB-INF/plugins");

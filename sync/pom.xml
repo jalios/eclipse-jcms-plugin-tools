@@ -34,6 +34,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>4.0.2.RELEASE</version>
+			<scope>test</scope>			
 		</dependency>
 		<dependency>
 			<groupId>jdom</groupId>

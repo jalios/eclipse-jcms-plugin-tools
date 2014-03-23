@@ -270,7 +270,7 @@ public class IOUtil {
   public static File findPluginXMLFile(File directory) throws FileNotFoundException {
     Collection<File> files = FileUtils.listFiles(directory, FileFilterUtils.nameFileFilter(ParseConstants.PLUGIN_XML),
         TrueFileFilter.INSTANCE);
-
+    
     if (!files.isEmpty() && files.size() == 1) {
       return files.iterator().next();
     }
