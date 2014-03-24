@@ -15,24 +15,27 @@ package com.jalios.ejpt.sync;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.LinkedList;
+import java.util.List;
 
+import com.jalios.ejpt.parser.ParseUtil;
 import com.jalios.ejpt.sync.utils.BlackListFilter;
 
 /**
  * @author Xuan Tuong LE - lxtuong@gmail.com
- *
+ * 
  */
 public final class SyncStrategyConfiguration {
   private File pluginDirectory;
   private File webappDirectory;
-  private File config;
   private FileFilter fileFilter;
-  
+  private List<File> filesDeclaredByPluginXML = new LinkedList<File>();
+
   private SyncStrategyConfiguration(Builder builder) {
     this.pluginDirectory = builder.pluginDirectory;
     this.webappDirectory = builder.webappDirectory;
-    this.config = builder.config;
     this.fileFilter = builder.fileFilter;
+    this.filesDeclaredByPluginXML = builder.filesDeclaredByPluginXML;
   }
 
   public File getPluginProjectDirectory() {
@@ -42,16 +45,20 @@ public final class SyncStrategyConfiguration {
   public File getWebappProjectDirectory() {
     return webappDirectory;
   }
-  
-  public FileFilter getFileFilter(){
+
+  public FileFilter getFileFilter() {
     return fileFilter;
   }
-    
+
+  public List<File> getFilesDeclaredByPluginXML() {
+    return filesDeclaredByPluginXML;
+  }
+
   public static class Builder {
     private File pluginDirectory;
     private File webappDirectory;
-    private File config;
     private FileFilter fileFilter = new BlackListFilter.Builder().build();
+    private List<File> filesDeclaredByPluginXML = new LinkedList<File>();
 
     public Builder(File ppRootDir, File wpRootDir) {
       this.pluginDirectory = ppRootDir;
@@ -62,12 +69,13 @@ public final class SyncStrategyConfiguration {
       SyncPropertyManager propertyManager = SyncPropertyManager.init(config);
       fileFilter = new BlackListFilter.Builder().excludedDirs(propertyManager.getExcludedDirs())
           .excludedFiles(propertyManager.getExcludedFiles()).build();
-      this.config = config;
       return this;
     }
 
     public SyncStrategyConfiguration build() {
+      filesDeclaredByPluginXML = ParseUtil.getPluginXmlDeclaredFiles(this.pluginDirectory, this.fileFilter);
       return new SyncStrategyConfiguration(this);
     }
+
   }
 }

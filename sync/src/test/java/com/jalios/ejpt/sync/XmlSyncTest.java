@@ -127,7 +127,7 @@ public class XmlSyncTest extends TestUtil {
 
   @Test
   public void syncNewPluginProject() {
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -148,7 +148,7 @@ public class XmlSyncTest extends TestUtil {
 
   @Test
   public void checkFileAddedToWebapp() {
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -166,7 +166,7 @@ public class XmlSyncTest extends TestUtil {
 
   @Test
   public void checkFileAddedToPlugin() {
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -202,7 +202,7 @@ public class XmlSyncTest extends TestUtil {
 
   @Test
   public void checkFileModified() {
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -243,7 +243,7 @@ public class XmlSyncTest extends TestUtil {
       e1.printStackTrace();
     }
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -268,7 +268,7 @@ public class XmlSyncTest extends TestUtil {
       fail(e.getMessage());
     }
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -287,7 +287,7 @@ public class XmlSyncTest extends TestUtil {
   @Test
   public void checkFileCouldBeMissedWebappProject() {
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -321,7 +321,7 @@ public class XmlSyncTest extends TestUtil {
       e1.printStackTrace();
     }
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -344,7 +344,7 @@ public class XmlSyncTest extends TestUtil {
       e.printStackTrace();
     }
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
@@ -369,7 +369,7 @@ public class XmlSyncTest extends TestUtil {
       e1.printStackTrace();
     }
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         tmpWebappProjectTestDirectory).configuration(null).build();
     try {
@@ -398,7 +398,7 @@ public class XmlSyncTest extends TestUtil {
       e1.printStackTrace();
     }
 
-    SyncStrategy strategy = (SyncStrategy) context.getBean("xmlStrategy");
+    SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).configuration(getFileFromResource("sync.conf")).build();
     try {

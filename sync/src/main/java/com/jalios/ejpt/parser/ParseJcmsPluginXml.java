@@ -68,7 +68,7 @@ public final class ParseJcmsPluginXml implements ParseService {
     rootDirectory = directory;
     File pluginFile;
     try {
-      pluginFile = IOUtil.findPluginXMLFile(directory);
+      pluginFile = IOUtil.findPluginXMLFile(new File(directory, "WEB-INF/plugins"));
     } catch (FileNotFoundException exception) {
       logger.error(exception.getMessage());
       throw new ParseException(exception.getMessage());

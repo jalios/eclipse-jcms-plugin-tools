@@ -14,11 +14,13 @@
 package com.jalios.ejpt.parser;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -29,6 +31,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import com.jalios.ejpt.sync.utils.BlackListFilter;
+import com.jalios.ejpt.sync.utils.IOUtil;
 import com.jalios.ejpt.sync.utils.Util;
 
 /**
@@ -114,6 +117,32 @@ public class ParseUtil {
       pluginPrivateDirectory = rootDirectories[0];
     }
     return pluginPrivateDirectory;
+  }
+
+  public static List<File> getPluginXmlDeclaredFiles(File projectRootDirectory, FileFilter filter) {
+    // check status from plugin.xml
+    ParseService parser = new ParseJcmsPluginXml();
+    ParseInfo info = new ParseInfo();
+
+    try {
+      info = parser.parse(projectRootDirectory);
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+
+    List<File> files = new LinkedList<File>();
+
+    for (String declaredFilePath : info.getFilesPath()) {
+      File declaredFile = new File(projectRootDirectory, declaredFilePath);
+      if (declaredFile.isDirectory()) {
+        files.addAll(IOUtil.deepListFiles(declaredFile, filter));
+        continue;
+      }
+
+      files.add(new File(projectRootDirectory, declaredFilePath));
+    }
+
+    return files;
   }
 
 }

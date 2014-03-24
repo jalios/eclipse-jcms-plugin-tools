@@ -92,5 +92,14 @@ public class Util {
     }
     return properties;
   }
+  
+  public static boolean containsByName(List<File> files, File anotherFile) {
+    for (File file : files) {
+      if (file.getName().equals(anotherFile.getName())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 }

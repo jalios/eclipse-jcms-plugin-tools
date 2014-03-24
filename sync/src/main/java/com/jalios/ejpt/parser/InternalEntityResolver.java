@@ -16,19 +16,21 @@ package com.jalios.ejpt.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 /**
  * 
  * @author Xuan Tuong LE - lxtuong@gmail.com
- *
+ * 
  */
 class InternalEntityResolver implements EntityResolver {
   private static final Logger logger = Logger.getLogger(InternalEntityResolver.class);
-  private final HashMap<String, String> dtdMap = new HashMap<String, String>();
+  private final Map<String, String> dtdMap = new HashMap<String, String>();
 
   public InternalEntityResolver() {
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.0//EN", "jcms-plugin-1.0.dtd");
@@ -38,6 +40,17 @@ class InternalEntityResolver implements EntityResolver {
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.4//EN", "jcms-plugin-1.4.dtd");
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.5//EN", "jcms-plugin-1.5.dtd");
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.6//EN", "jcms-plugin-1.6.dtd");
+  }
+
+  private boolean isPublicIdExist(String publicId){
+    return dtdMap.get(publicId) != null;
+  }
+  
+  public void put(String key, String value) {
+    if (isPublicIdExist(key)) {
+      return;
+    }
+    dtdMap.put(key, value);
   }
 
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
