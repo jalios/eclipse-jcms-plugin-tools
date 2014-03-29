@@ -19,15 +19,16 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.jalios.ejpt.sync.CopyExecutor;
+import com.jalios.ejpt.sync.GlobalSyncStrategy;
 import com.jalios.ejpt.sync.SyncStrategy;
 import com.jalios.ejpt.sync.SyncStrategyConfiguration;
 import com.jalios.ejpt.sync.SyncStrategyException;
 import com.jalios.ejpt.sync.SyncStrategyReport;
-import com.jalios.ejpt.sync.GlobalSyncStrategy;
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 import com.jalios.jcmstools.transversal.EJPTUtil;
 
@@ -53,6 +54,15 @@ public class SyncHandlerUtil {
   public static void refreshProject(IProject project) {
     try {
       project.refreshLocal(IResource.DEPTH_INFINITE, null);
+    } catch (CoreException e) {
+      e.printStackTrace();
+    }
+  }
+  
+
+  public static void refreshProject(IProject project, IProgressMonitor monitor) {
+    try {
+      project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     } catch (CoreException e) {
       e.printStackTrace();
     }
@@ -90,18 +100,18 @@ public class SyncHandlerUtil {
       consoleStream.println("?->? : Nothing is done on these files");      
       consoleStream
           .println("(FileNotFoundOnDisk) Recheck your plugin.xml because these files aren't on disk anymore");
-      consoleStream.println("(FileShouldDeclare) Theses files won't be embedded in plugin until you declare them in plugin.xml. You could ignore them in sync.conf");
+      consoleStream.println("(FileShouldBeDeclared) Theses files won't be embedded in plugin until you declare them in plugin.xml. You could ignore them in sync.conf");
     }
     consoleStream.println("-----------------------------------------------------------");
 
     for (FileSyncStatus syncStatus : syncFilesToPlugin) {
-      consoleStream.println("(" + syncStatus.getStatusName() + ") " + "W->P : " + syncStatus.getDestination());
+      consoleStream.println("(" + syncStatus.getStatusName() + ") " + "W->P : " + syncStatus.getDestination().getPath());
     }
     for (FileSyncStatus sf : syncFilesToWebapp) {
-      consoleStream.println("(" + sf.getStatusName() + ") " + "P->W : " + sf.getDestination());
+      consoleStream.println("(" + sf.getStatusName() + ") " + "P->W : " + sf.getDestination().getPath());
     }
     for (FileSyncStatus sf : syncFilesUnknown) {
-      consoleStream.println("(" + sf.getStatusName() + ") " + "?->? : " + sf.getDestination());
+      consoleStream.println("(" + sf.getStatusName() + ") " + "?->? : " + sf.getDestination().getPath());
     }
   }
 

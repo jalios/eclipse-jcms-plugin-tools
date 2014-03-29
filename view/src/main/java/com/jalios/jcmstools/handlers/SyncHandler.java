@@ -20,6 +20,10 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.jalios.ejpt.sync.SyncStrategyConfiguration;
@@ -54,30 +58,42 @@ public class SyncHandler extends AbstractHandler {
       return null; // TODO : why this weird return
     }
 
-    run(configuration);
-    SyncHandlerUtil.refreshProject(pluginProject);
-    SyncHandlerUtil.refreshProject(webappProject);
+  
+
+    String jobname = "Check sync";
+    Job sync = new SyncJob(jobname);
+    sync.schedule();
 
     return null; // TODO : why this weird return
   }
 
-  private void run(SyncStrategyConfiguration configuration) {
-    long start = System.currentTimeMillis();
-    SyncStrategyReport report = new SyncStrategyReport();
-    try {
-      if (preview){
-        report = SyncHandlerUtil.previewSync(configuration);
-      }else{
-        report = SyncHandlerUtil.sync(configuration);
-      }     
-    } catch (SyncStrategyException e) {
-      consoleStream.println(e.getMessage());
+  public class SyncJob extends Job {
+    private SyncJob(String name) {
+      super(name);
     }
-    SyncHandlerUtil.printReportToConsole(report, consoleStream, preview,
-        EJPTUtil.getWebappDirectoryPath(webappProject), pluginProject.getLocation().toFile().getAbsolutePath());
-    consoleStream.println("-----------------------------------------------------------");
-    consoleStream.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
 
+    protected IStatus run(IProgressMonitor monitor) {
+      monitor.beginTask("Sync is running...", 10);
+      long start = System.currentTimeMillis();
+      SyncStrategyReport report = new SyncStrategyReport();
+      try {
+        if (preview) {
+          report = SyncHandlerUtil.previewSync(configuration);          
+        } else {
+          report = SyncHandlerUtil.sync(configuration);
+          SyncHandlerUtil.refreshProject(pluginProject, monitor);
+          SyncHandlerUtil.refreshProject(webappProject, monitor);
+        }
+      } catch (SyncStrategyException e) {
+        consoleStream.println(e.getMessage());
+      }
+      monitor.worked(5);
+      SyncHandlerUtil.printReportToConsole(report, consoleStream, preview,
+          EJPTUtil.getWebappDirectoryPath(webappProject), pluginProject.getLocation().toFile().getAbsolutePath());
+      consoleStream.println("-----------------------------------------------------------");
+      consoleStream.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
+      return Status.OK_STATUS;
+    }
   }
 
   private void detectCommandNature(Command cmd) {
@@ -94,7 +110,6 @@ public class SyncHandler extends AbstractHandler {
               + "or check your plugin project nature by using <nature>com.jalios.jpt.natures.jcmspluginnature</nature> in .project. "
               + "Operation aborted");
     }
-    
 
     webappProject = EJPTUtil.getJcmsWebappProject(pluginProject);
 
@@ -106,14 +121,13 @@ public class SyncHandler extends AbstractHandler {
     // init configuration and sync context
     File config = EJPTUtil.getSyncConfigurationFilePath(webappProject);
     File ppPath = pluginProject.getLocation().toFile();
-    
+
     try {
       IOUtil.findPluginXMLFile(ppPath);
     } catch (FileNotFoundException e) {
       throw new InitSyncContextException(e.getMessage());
     }
 
-    
     File wpPath = new File(EJPTUtil.getWebappDirectoryPath(webappProject));
     configuration = new SyncStrategyConfiguration.Builder(ppPath, wpPath).configuration(config).build();
   }
