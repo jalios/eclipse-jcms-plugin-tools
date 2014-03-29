@@ -12,10 +12,10 @@ import org.junit.Test;
 
 import com.jalios.ejpt.TestUtil;
 import com.jalios.ejpt.sync.filesyncstatus.FileAdded;
-import com.jalios.ejpt.sync.filesyncstatus.FileCouldMissed;
+import com.jalios.ejpt.sync.filesyncstatus.FileCouldBeMissed;
 import com.jalios.ejpt.sync.filesyncstatus.FileModified;
 import com.jalios.ejpt.sync.filesyncstatus.FileNotFoundOnDisk;
-import com.jalios.ejpt.sync.filesyncstatus.FileShouldDeclare;
+import com.jalios.ejpt.sync.filesyncstatus.FileShouldBeDeclared;
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 import com.jalios.ejpt.sync.utils.IOUtil;
 
@@ -164,6 +164,7 @@ public class XmlSyncTest extends TestUtil {
     }
   }
 
+  /*
   @Test
   public void checkFileAddedToPlugin() {
     SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
@@ -199,6 +200,7 @@ public class XmlSyncTest extends TestUtil {
       e.printStackTrace();
     }
   }
+  */
 
   @Test
   public void checkFileModified() {
@@ -278,7 +280,7 @@ public class XmlSyncTest extends TestUtil {
       assertEquals(report.getSyncFilesUnknown().size(), 1);
 
       FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
-      assertTrue(syncStatus instanceof FileShouldDeclare);
+      assertTrue(syncStatus instanceof FileShouldBeDeclared);
     } catch (SyncStrategyException e) {
       fail(e.getMessage());
     }
@@ -305,7 +307,7 @@ public class XmlSyncTest extends TestUtil {
       assertEquals(report.getSyncFilesUnknown().size(), 1);
 
       FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
-      assertTrue(syncStatus instanceof FileCouldMissed);
+      assertTrue(syncStatus instanceof FileCouldBeMissed);
     } catch (SyncStrategyException e) {
       fail(e.getMessage());
     }

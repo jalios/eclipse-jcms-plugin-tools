@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.jalios.ejpt.parser.ParseUtil;
 import com.jalios.ejpt.sync.filesyncstatus.FileAdded;
-import com.jalios.ejpt.sync.filesyncstatus.FileCouldMissed;
+import com.jalios.ejpt.sync.filesyncstatus.FileCouldBeMissed;
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 import com.jalios.ejpt.sync.utils.IOUtil;
 import com.jalios.ejpt.sync.utils.Util;
@@ -26,25 +26,27 @@ public class NewFileFromWebappDirectoryStrategy implements SyncStrategy {
       return report;
     }
 
-    List<File> webappFilesByPluginXml = ParseUtil.getPluginXmlDeclaredFiles(configuration.getWebappProjectDirectory(), configuration.getFileFilter());
-
-    for (File declareWebappFile : webappFilesByPluginXml) {
-      if (!declareWebappFile.exists()) {
-        continue;
-      }
-
-      File destinationFile = IOUtil.getDestinationFile(configuration.getPluginProjectDirectory(),
-          configuration.getWebappProjectDirectory(), declareWebappFile);
-
-      if (!destinationFile.exists()) {
-        FileSyncStatus fileAdded = new FileAdded(declareWebappFile, destinationFile);
-        report.addReport(fileAdded, SyncStrategyReport.Direction.TO_PLUGIN);
-      }
-    }
+    
+//    List<File> webappFilesByPluginXml = ParseUtil.getPluginXmlDeclaredFiles(configuration.getWebappProjectDirectory(), configuration.getFileFilter());
+//
+//    for (File declareWebappFile : webappFilesByPluginXml) {
+//      if (!declareWebappFile.exists()) {
+//        continue;
+//      }
+//
+//      File destinationFile = IOUtil.getDestinationFile(configuration.getPluginProjectDirectory(),
+//          configuration.getWebappProjectDirectory(), declareWebappFile);
+//
+//      if (!destinationFile.exists()) {
+//        FileSyncStatus fileAdded = new FileAdded(declareWebappFile, destinationFile);
+//        report.addReport(fileAdded, SyncStrategyReport.Direction.TO_PLUGIN);
+//      }
+//    }
+    
 
     for (File itFile : IOUtil.deepListFiles(pluginPublicDirectory, configuration.getFileFilter())) {
       if (!Util.containsByName(configuration.getFilesDeclaredByPluginXML(), itFile)) {
-        report.addReport(new FileCouldMissed(itFile), SyncStrategyReport.Direction.UNKNOWN);
+        report.addReport(new FileCouldBeMissed(itFile), SyncStrategyReport.Direction.UNKNOWN);
       }
     }
 

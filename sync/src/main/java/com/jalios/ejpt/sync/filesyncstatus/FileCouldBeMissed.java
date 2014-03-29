@@ -2,10 +2,10 @@ package com.jalios.ejpt.sync.filesyncstatus;
 
 import java.io.File;
 
-public class FileShouldDeclare extends FileSyncStatus {
+public final class FileCouldBeMissed extends FileSyncStatus {
 
-  public FileShouldDeclare(File fileShoudBeDeclared) {
-    super(fileShoudBeDeclared, fileShoudBeDeclared);
+  public FileCouldBeMissed(File fileCouldMissed) {
+    super(fileCouldMissed, fileCouldMissed);
   }
   
   @Override
@@ -13,4 +13,3 @@ public class FileShouldDeclare extends FileSyncStatus {
     return this.getClass().getSimpleName();
   }
 }
-
