@@ -2,7 +2,7 @@
 <feature
       id="com.jalios.ejpt.feature"
       label="%featureName"
-      version="2.0.0.beta"
+      version="2.0.3.beta"
       provider-name="%providerName"
       plugin="com.jalios.ejpt">
 

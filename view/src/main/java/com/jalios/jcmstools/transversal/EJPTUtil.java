@@ -176,7 +176,7 @@ public class EJPTUtil {
     return false;
   }
 
-  public static IProject getSyncProject(ExecutionEvent event) {
+  public static IProject getSelectedProject(ExecutionEvent event) {
     IProject syncProject = null;
 
     // case 1 : user is working on an active editor on a file and sync
@@ -247,7 +247,7 @@ public class EJPTUtil {
     return null;
   }
 
-  public static Set<IProject> getJCMSPluginProjects() {
+  public static Set<IProject> getPluginProjects() {
     IProject[] availableProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 
     if (availableProjects == null) {

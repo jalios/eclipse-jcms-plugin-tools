@@ -20,14 +20,16 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.jalios.ejpt.jobs.SyncJob;
+import com.jalios.ejpt.log.ConsoleLog;
 import com.jalios.ejpt.sync.SyncStrategyConfiguration;
-import com.jalios.ejpt.sync.SyncStrategyException;
-import com.jalios.ejpt.sync.SyncStrategyReport;
+import com.jalios.ejpt.sync.context.InitSyncContextException;
+import com.jalios.ejpt.sync.context.SyncContext;
 import com.jalios.jcmstools.transversal.EJPTUtil;
 
 /**
@@ -38,17 +40,10 @@ import com.jalios.jcmstools.transversal.EJPTUtil;
 public class SyncAllHandler extends AbstractHandler {
   public static final String ID = "SyncAllHandler";
   public static final String ID_PREVIEW_CMD = "com.jalios.commands.previewall";
-  private static final String CONSOLE_NAME = "Jalios Plugin Tools - Sync Status";
   private boolean preview = true;
-  private MessageConsoleStream consoleStream;
+  private static final ConsoleLog logger = ConsoleLog.getInstance();
 
-  /**
-   * The constructor.
-   */
-  public SyncAllHandler() {
-  }
-
-  public boolean isPreview(Command cmd) {
+  private boolean isPreview(Command cmd) {
     if (cmd == null) {
       return false;
     }
@@ -71,58 +66,52 @@ public class SyncAllHandler extends AbstractHandler {
         return null;
       }
     }
-    consoleStream = SyncHandlerUtil.initConsole(CONSOLE_NAME);
 
-    for (IProject jcmsPluginProject : EJPTUtil.getJCMSPluginProjects()) {
-      consoleStream.println("\n---------------------------------------------------");
-      consoleStream.println("Begin Sync for project '" + jcmsPluginProject + "'");
-      consoleStream.println("---------------------------------------------------");
-
-      // determine projects to sync
-      IProject jcmsWebappProject = EJPTUtil.getJcmsWebappProject(jcmsPluginProject);
-
-      if (jcmsWebappProject == null) {
-        consoleStream.println("Please link the JCMSPlugin project to a webapp project. Right-click on "
-            + jcmsPluginProject + " > Properties > Project References > Choose the webapp project");
-        consoleStream.println("Operation aborted.");
-        break; // next project
+    for (IProject pluginProject : EJPTUtil.getPluginProjects()) {
+      SyncContext context;
+      try {
+        context = initSyncContext(pluginProject);
+        context.setPreview(preview);
+      } catch (InitSyncContextException e) {
+        logger.info(e.getMessage());
+        break;
       }
 
-      // init configuration and sync context
-      File config = EJPTUtil.getSyncConfigurationFilePath(jcmsWebappProject);
-      File pluginDirectory = jcmsPluginProject.getLocation().toFile();
-      File webappDirectory = new File(EJPTUtil.getWebappDirectoryPath(jcmsWebappProject));
-      SyncStrategyConfiguration conf = new SyncStrategyConfiguration.Builder(pluginDirectory, webappDirectory)
-          .configuration(config).build();
+      Job sync = new SyncJob("Check sync for : " + pluginProject, context);
+      sync.schedule();
 
-      run(conf, preview, pluginDirectory, webappDirectory);
-      SyncHandlerUtil.refreshProject(jcmsPluginProject);
-      SyncHandlerUtil.refreshProject(jcmsWebappProject);
-
-      consoleStream.println("\n---------------------------------------------------");
-      consoleStream.println("END Sync for project '" + jcmsPluginProject + "'");
-      consoleStream.println("---------------------------------------------------\n");
     }
     return null;
   }
 
-  private void run(SyncStrategyConfiguration configuration, boolean isPreview, File pluginDirectory,
-      File webappDirectory) {
-    long start = System.currentTimeMillis();
-    SyncStrategyReport report = new SyncStrategyReport();
-    try {
-      if (preview) {
-        report = SyncHandlerUtil.previewSync(configuration);
-      } else {
-        report = SyncHandlerUtil.sync(configuration);
-      }
-    } catch (SyncStrategyException e) {
-      consoleStream.println(e.getMessage());
+  private SyncContext initSyncContext(IProject pluginProject) throws InitSyncContextException {
+    if (pluginProject == null) {
+      throw new InitSyncContextException(
+          "Cannot detect plugin project. "
+              + "Make sure that you launch on the plugin project "
+              + "or check your plugin project nature by using <nature>com.jalios.jpt.natures.jcmspluginnature</nature> in .project. "
+              + "Operation aborted");
     }
-    SyncHandlerUtil.printReportToConsole(report, consoleStream, preview, webappDirectory.getAbsolutePath(),
-        pluginDirectory.getAbsolutePath());
-    consoleStream.println("-----------------------------------------------------------");
-    consoleStream.println("Sync took : " + (System.currentTimeMillis() - start) + " ms");
+    SyncContext context = new SyncContext();
+    // determine projects to sync
+    IProject webappProject = EJPTUtil.getJcmsWebappProject(pluginProject);
 
+    if (webappProject == null) {
+      throw new InitSyncContextException("Please link the JCMSPlugin project to a webapp project. Right-click on "
+          + pluginProject + " > Properties > Project References > Choose the webapp project");
+    }
+
+    // init configuration and sync context
+    File configurationFile = EJPTUtil.getSyncConfigurationFilePath(webappProject);
+    File pluginDirectory = pluginProject.getLocation().toFile();
+    File webappDirectory = new File(EJPTUtil.getWebappDirectoryPath(webappProject));
+    SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginDirectory, webappDirectory)
+        .configuration(configurationFile).build();
+
+    context.setPluginProject(pluginProject);
+    context.setWebappProject(webappProject);
+    context.setConfiguration(configuration);
+
+    return context;
   }
 }
