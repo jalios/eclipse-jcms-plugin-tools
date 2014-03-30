@@ -14,5 +14,9 @@
 package com.jalios.ejpt.sync;
 
 public class SyncStrategyException extends Exception {
+  private static final long serialVersionUID = 7902654726747605888L;
 
+  public SyncStrategyException(String msg){
+    super(msg);
+  }
 }

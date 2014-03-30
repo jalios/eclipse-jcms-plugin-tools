@@ -11,15 +11,15 @@
  the terms and conditions of version 3 of the GNU General Public
  License
  */
-package com.jalios.ejpt.sync;
+package com.jalios.ejpt.sync.executor;
+
+import com.jalios.ejpt.sync.SyncReportManager;
 
 /**
- * A strategy don't execute anything
- * It'll only return a report which will be treated by an executor dedicated
+ * 
  * @author Xuan Tuong LE - lxtuong@gmail.com
  *
  */
-public interface SyncStrategy {
-  public SyncStrategyReport run(SyncStrategyConfiguration configuration) throws SyncStrategyException;
-
+public interface SyncExecutor {
+  public void run(SyncReportManager report);
 }

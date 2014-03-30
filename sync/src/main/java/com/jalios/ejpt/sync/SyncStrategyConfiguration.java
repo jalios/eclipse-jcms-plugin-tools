@@ -29,13 +29,13 @@ public final class SyncStrategyConfiguration {
   private File pluginDirectory;
   private File webappDirectory;
   private FileFilter fileFilter;
-  private List<File> filesDeclaredByPluginXML = new LinkedList<File>();
+  private List<File> filesExpectedByPluginXML = new LinkedList<File>();
 
   private SyncStrategyConfiguration(Builder builder) {
     this.pluginDirectory = builder.pluginDirectory;
     this.webappDirectory = builder.webappDirectory;
     this.fileFilter = builder.fileFilter;
-    this.filesDeclaredByPluginXML = builder.filesDeclaredByPluginXML;
+    this.filesExpectedByPluginXML = builder.filesExpectedByPluginXML;
   }
 
   public File getPluginProjectDirectory() {
@@ -50,15 +50,15 @@ public final class SyncStrategyConfiguration {
     return fileFilter;
   }
 
-  public List<File> getFilesDeclaredByPluginXML() {
-    return filesDeclaredByPluginXML;
+  public List<File> getFilesExpectedByPluginXML() {
+    return filesExpectedByPluginXML;
   }
 
   public static class Builder {
     private File pluginDirectory;
     private File webappDirectory;
     private FileFilter fileFilter = new BlackListFilter.Builder().build();
-    private List<File> filesDeclaredByPluginXML = new LinkedList<File>();
+    private List<File> filesExpectedByPluginXML = new LinkedList<File>();
 
     public Builder(File ppRootDir, File wpRootDir) {
       this.pluginDirectory = ppRootDir;
@@ -73,7 +73,7 @@ public final class SyncStrategyConfiguration {
     }
 
     public SyncStrategyConfiguration build() {
-      filesDeclaredByPluginXML = ParseUtil.getPluginXmlDeclaredFiles(this.pluginDirectory, this.fileFilter);
+      filesExpectedByPluginXML = ParseUtil.getPluginXmlDeclaredFiles(this.pluginDirectory, this.fileFilter);
       return new SyncStrategyConfiguration(this);
     }
 

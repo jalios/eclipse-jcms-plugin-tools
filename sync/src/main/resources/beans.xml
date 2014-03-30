@@ -4,6 +4,6 @@
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<bean id="parseJcmsPluginXml" class="com.jalios.ejpt.parser.ParseJcmsPluginXml">
 	</bean>
-	<bean id="sync" class="com.jalios.ejpt.sync.GlobalSyncStrategy">
+	<bean id="sync" class="com.jalios.ejpt.sync.strategy.GlobalSyncStrategy">
 	</bean>
 </beans>

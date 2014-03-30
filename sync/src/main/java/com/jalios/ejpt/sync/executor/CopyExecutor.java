@@ -11,12 +11,13 @@
  the terms and conditions of version 3 of the GNU General Public
  License
  */
-package com.jalios.ejpt.sync;
+package com.jalios.ejpt.sync.executor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jalios.ejpt.sync.SyncReportManager;
 import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 import com.jalios.ejpt.sync.utils.IOUtil;
 
@@ -28,7 +29,7 @@ import com.jalios.ejpt.sync.utils.IOUtil;
 public class CopyExecutor implements SyncExecutor {
 
   @Override
-  public void run(SyncStrategyReport report) {
+  public void run(SyncReportManager report) {
     List<FileSyncStatus> syncFiles = new ArrayList<FileSyncStatus>();
     syncFiles.addAll(report.getSyncFilesToPlugin());
     syncFiles.addAll(report.getSyncFilesToWebapp());
