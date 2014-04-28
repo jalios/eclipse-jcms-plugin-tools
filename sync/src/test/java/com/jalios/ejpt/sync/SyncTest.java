@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,9 @@ import com.jalios.ejpt.sync.filesyncstatus.FileSyncStatus;
 import com.jalios.ejpt.sync.strategy.SyncStrategy;
 import com.jalios.ejpt.sync.utils.IOUtil;
 
-public class XmlSyncTest extends TestUtil {
+import static org.assertj.core.api.Assertions.*;
+
+public class SyncTest extends TestUtil {
   private File tmpWebappProjectTestDirectory;
   private File tmpPluginProjectTestDirectory;
 
@@ -127,24 +130,38 @@ public class XmlSyncTest extends TestUtil {
 
   }
 
+  private void createUnitTestDirectory() {
+    try {
+
+      new File(pluginProjectDirectory, "unittests/com/jalios/ejpt/test").mkdirs();
+      new File(pluginProjectDirectory, "unittests/com/jalios/ejpt/test/Test1.java").createNewFile();
+      new File(pluginProjectDirectory, "unittests/com/jalios/ejpt/test/Test2.java").createNewFile();
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   @Test
   public void syncNewPluginProject() {
     SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
     SyncStrategyConfiguration configuration = new SyncStrategyConfiguration.Builder(pluginProjectDirectory,
         webappProjectDirectory).build();
     try {
+      // sync
       SyncReportManager report = strategy.run(configuration);
       report.run(new CopyExecutor());
-      assertEquals(report.getSyncFilesToWebapp().size(), 16);
-      assertEquals(report.getSyncFilesToPlugin().size(), 0);
 
+      assertThat(report.getSyncFilesToWebapp().size()).isEqualTo(16);
+      assertThat(report.getSyncFilesToPlugin().size()).isEqualTo(0);
+
+      // check sync
       report = strategy.run(configuration);
+      assertThat(report.getSyncFilesToWebapp().size()).isEqualTo(0);
+      assertThat(report.getSyncFilesToPlugin().size()).isEqualTo(0);
 
-      assertEquals(report.getSyncFilesToWebapp().size(), 0);
-      assertEquals(report.getSyncFilesToPlugin().size(), 0);
-
-    } catch (SyncStrategyException e) {
-      e.printStackTrace();
+    } catch (SyncStrategyException exception) {
+      fail("report failed", exception);
     }
   }
 
@@ -181,7 +198,7 @@ public class XmlSyncTest extends TestUtil {
             "WEB-INF/classes/com/jalios/ejpt/test/BasicDataController.java"));
         FileUtils.touch(FileUtils.getFile(webappProjectDirectory, "WEB-INF/classes/com/jalios/ejpt/test/MacUtil.java"));
       } catch (IOException e) {
-        fail("Cannot touch files to test this case");
+        Assertions.fail("Cannot touch files to test this case");
       }
 
       report = strategy.run(configuration);
@@ -196,7 +213,7 @@ public class XmlSyncTest extends TestUtil {
       }
 
     } catch (SyncStrategyException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
   }
 
@@ -222,7 +239,7 @@ public class XmlSyncTest extends TestUtil {
       assertTrue(syncStatus instanceof FileNotFoundOnDisk);
 
     } catch (SyncStrategyException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
   }
 
@@ -231,7 +248,7 @@ public class XmlSyncTest extends TestUtil {
     try {
       new File(pluginProjectDirectory, "plugins/TestPlugin/css/css-not-found-in-plugin-xml.css").createNewFile();
     } catch (IOException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
 
     SyncStrategy strategy = (SyncStrategy) context.getBean("sync");
@@ -240,13 +257,13 @@ public class XmlSyncTest extends TestUtil {
     try {
       SyncReportManager report = strategy.run(configuration);
       report.run(new CopyExecutor());
-      assertEquals(report.getSyncFilesToWebapp().size(), 16);
-      assertEquals(report.getSyncFilesUnknown().size(), 1);
+      assertThat(report.getSyncFilesToWebapp().size()).isEqualTo(16);
+      assertThat(report.getSyncFilesUnknown().size()).isEqualTo(1);
 
       FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
       assertTrue(syncStatus instanceof FileShouldBeDeclared);
     } catch (SyncStrategyException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
   }
 
@@ -265,7 +282,7 @@ public class XmlSyncTest extends TestUtil {
         new File(webappProjectDirectory, "plugins/TestPlugin/css/css-could-missed-in-public-directory.css")
             .createNewFile();
       } catch (IOException e) {
-        fail(e.getMessage());
+        Assertions.fail(e.getMessage());
       }
       report = strategy.run(configuration);
       assertEquals(report.getSyncFilesUnknown().size(), 1);
@@ -273,7 +290,7 @@ public class XmlSyncTest extends TestUtil {
       FileSyncStatus syncStatus = report.getSyncFilesUnknown().iterator().next();
       assertTrue(syncStatus instanceof FileCouldBeMissed);
     } catch (SyncStrategyException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
   }
 
