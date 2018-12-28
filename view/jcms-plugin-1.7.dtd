@@ -1,0 +1,287 @@
+<?xml encoding="utf-8"?>
+
+<!ELEMENT plugin (label+
+                  ,description+
+                  ,(dependencies?
+                   |types?
+                   |workflows?
+                   |jars?
+                   |java-classes?
+                   |plugincomponents?
+                   |hibernate?
+                   |openapi?
+                   |private-files?
+                   |public-files?
+                   |webapp-files?)*)>
+                  
+<!ATTLIST plugin
+    xmlns      CDATA        #FIXED ''
+    name       CDATA        #REQUIRED
+    version    CDATA        #REQUIRED
+    author     CDATA        #REQUIRED
+    license    CDATA        "Proprietary"
+    class      CDATA        #IMPLIED
+    order      CDATA        #IMPLIED
+    initialize (true|false) #IMPLIED
+    jsync      (true|false) #IMPLIED
+    appserver  CDATA        #IMPLIED
+    url        CDATA        #IMPLIED
+    jcms       CDATA        #IMPLIED>
+
+<!-- 
+################################################ 
+# LABEL / DESCRIPTION
+################################################
+-->
+    
+<!ELEMENT label (#PCDATA)>
+<!ATTLIST label
+    xmlns    CDATA #FIXED ''
+    xml:lang CDATA #REQUIRED>
+    
+<!ELEMENT description (#PCDATA)>
+<!ATTLIST description
+    xmlns    CDATA #FIXED ''
+    xml:lang CDATA #REQUIRED>
+
+<!-- 
+################################################ 
+# DEPENDENCIES
+################################################
+-->
+
+<!ELEMENT dependencies (dependency)*>
+<!ATTLIST dependencies
+    xmlns CDATA #FIXED ''>
+
+<!ELEMENT dependency EMPTY>
+<!ATTLIST dependency
+    xmlns CDATA #FIXED ''
+    name  CDATA #REQUIRED
+    active  CDATA #IMPLIED>    
+
+<!-- 
+################################################ 
+# TYPES
+################################################
+-->
+
+<!ELEMENT types (type*|templates*)*>
+<!ATTLIST type
+    xmlns    CDATA #FIXED ''>
+    
+<!-- 
+# TYPES
+-->
+
+<!ELEMENT type (file)*>
+<!ATTLIST type
+    xmlns    CDATA #FIXED ''
+    name     CDATA #REQUIRED>
+
+<!--  
+# TEMPLATES
+-->
+
+<!ELEMENT templates (template*)>
+<!ATTLIST templates
+    xmlns CDATA #FIXED ''
+    type  CDATA #REQUIRED>
+
+<!ELEMENT template (label*,description*)>
+<!ATTLIST template
+    xmlns CDATA         #FIXED ''
+    file  CDATA         #REQUIRED
+    name  CDATA         #REQUIRED
+    usage CDATA         #REQUIRED
+    dir   (plugin|type) #IMPLIED>
+
+
+<!-- 
+################################################ 
+# WORKFLOW
+################################################
+-->
+
+<!ELEMENT workflows (workflow)+>
+<!ATTLIST workflows
+    xmlns CDATA #FIXED ''>
+
+<!ELEMENT workflow EMPTY>
+<!ATTLIST workflow
+    xmlns CDATA #FIXED ''
+    id    CDATA #REQUIRED>
+
+<!-- 
+################################################ 
+# JARS
+################################################
+-->
+
+<!ELEMENT jars (jar)+>
+<!ATTLIST jars
+    xmlns CDATA #FIXED ''>
+
+<!ELEMENT jar EMPTY>
+<!ATTLIST jar
+    xmlns CDATA #FIXED ''
+    path  CDATA #REQUIRED>
+
+<!-- 
+################################################ 
+# JAVA
+################################################
+-->
+
+<!ELEMENT java-classes (java)+>
+<!ATTLIST java-classes
+    xmlns CDATA #FIXED ''>
+
+<!ELEMENT java EMPTY>
+<!ATTLIST java
+    xmlns CDATA #FIXED ''
+    class CDATA #IMPLIED>
+<!ATTLIST java
+    xmlns CDATA #FIXED ''
+    package CDATA #IMPLIED
+    excludes CDATA #IMPLIED>
+
+
+<!-- 
+################################################ 
+# PLUGIN COMPONENTS
+################################################
+-->
+
+<!ELEMENT plugincomponents (storelistener|dblistener|jsynclistener|datacontroller|channellistener|queryfilter|cleanfilter|authenticationhandler|policyfilter|alarmlistener|alertchannel)* >
+
+<!ATTLIST plugincomponents xmlns CDATA #FIXED ''>
+
+<!ELEMENT storelistener EMPTY>
+<!ATTLIST storelistener
+    xmlns            CDATA        #FIXED ''
+    class            CDATA        #REQUIRED
+    types            CDATA        #REQUIRED
+    beforeStoreLoad  (true|false) #REQUIRED
+    repeat           (true|false) #REQUIRED>
+
+<!ELEMENT dblistener EMPTY>
+<!ATTLIST dblistener
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED
+    types CDATA #REQUIRED>
+
+<!ELEMENT jsynclistener EMPTY>
+<!ATTLIST jsynclistener
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+
+<!ELEMENT datacontroller EMPTY>
+<!ATTLIST datacontroller
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED
+    types CDATA #REQUIRED>
+
+<!ELEMENT channellistener EMPTY>
+<!ATTLIST channellistener
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+
+<!ELEMENT queryfilter EMPTY>
+<!ATTLIST queryfilter
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+
+<!ELEMENT cleanfilter EMPTY>
+<!ATTLIST cleanfilter
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+
+<!ELEMENT policyfilter EMPTY>
+<!ATTLIST policyfilter
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+
+<!ELEMENT authenticationhandler EMPTY>
+<!ATTLIST authenticationhandler
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+    
+<!ELEMENT alarmlistener EMPTY>
+<!ATTLIST alarmlistener
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED
+ schedule CDATA #IMPLIED
+frequency CDATA #IMPLIED
+  manager CDATA #IMPLIED>
+  
+<!ELEMENT alertchannel EMPTY>
+<!ATTLIST alertchannel
+    xmlns CDATA #FIXED ''
+    class CDATA #REQUIRED>
+    
+
+<!-- 
+################################################ 
+# HIBERNATE
+################################################
+-->
+
+<!ELEMENT hibernate (mapping)* >
+<!ATTLIST hibernate xmlns CDATA #FIXED ''>
+
+<!ELEMENT mapping EMPTY>
+<!ATTLIST mapping
+    xmlns            CDATA        #FIXED ''
+    resource         CDATA        #REQUIRED>
+
+
+<!-- 
+################################################ 
+# OPEN API
+################################################
+-->
+
+<!ELEMENT openapi (resource)* >
+<!ATTLIST openapi xmlns CDATA #FIXED ''>
+
+<!ELEMENT resource EMPTY>
+<!ATTLIST resource
+    xmlns            CDATA        #FIXED ''
+    class            CDATA        #REQUIRED
+    uriTemplate      CDATA        #REQUIRED>
+
+<!-- 
+################################################ 
+# PRIVATE / PUBLIC 
+################################################
+-->
+
+<!ELEMENT private-files (file|directory)*>
+<!ATTLIST private
+    xmlns CDATA #FIXED ''>
+
+<!ELEMENT public-files (file|directory)*>
+<!ATTLIST public
+    xmlns CDATA #FIXED ''>
+
+<!ELEMENT webapp-files (file|directory)*>
+<!ATTLIST public
+    xmlns CDATA #FIXED ''>
+
+<!-- 
+################################################ 
+# FILE INCLUDES
+################################################
+-->
+
+<!ELEMENT file EMPTY>
+<!ATTLIST file
+    xmlns    CDATA #FIXED ''
+    path     CDATA #REQUIRED
+    include  CDATA #IMPLIED>
+    
+<!ELEMENT directory EMPTY>
+<!ATTLIST directory
+    xmlns    CDATA #FIXED ''
+    path     CDATA #REQUIRED>

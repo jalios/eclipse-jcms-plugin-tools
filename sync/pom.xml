@@ -4,7 +4,7 @@
 	<groupId>com.jalios.ept</groupId>
 	<artifactId>sync</artifactId>
 	<packaging>jar</packaging>
-	<version>2.0</version>
+	<version>3.0</version>
 	<name>sync</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -67,6 +67,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
