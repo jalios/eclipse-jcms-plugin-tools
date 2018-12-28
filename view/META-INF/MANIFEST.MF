@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse JCMS Plugin Tools
 Bundle-SymbolicName: com.jalios.ejpt;singleton:=true
-Bundle-Version: 2.0.3.beta
+Bundle-Version: 2.0.4
 Bundle-Activator: com.jalios.jpt.Activator
 Bundle-Vendor: Jalios
 Require-Bundle: org.eclipse.ui,
@@ -14,4 +14,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  commons-logging-1.1.jar,
- sync-2.0-jar-with-dependencies.jar
+ sync-3.0-jar-with-dependencies.jar

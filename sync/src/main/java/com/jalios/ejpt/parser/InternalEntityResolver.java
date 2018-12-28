@@ -40,6 +40,7 @@ class InternalEntityResolver implements EntityResolver {
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.4//EN", "jcms-plugin-1.4.dtd");
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.5//EN", "jcms-plugin-1.5.dtd");
     dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.6//EN", "jcms-plugin-1.6.dtd");
+    dtdMap.put("-//JALIOS//DTD JCMS-PLUGIN 1.7//EN", "jcms-plugin-1.7.dtd");
   }
 
   private boolean isPublicIdExist(String publicId){
